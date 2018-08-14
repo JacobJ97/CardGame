@@ -3,10 +3,12 @@ import java.util.ArrayList;
 public class Player {
 
     private ArrayList<Card> playerCards;
+    private int playerBalance;
     private String name;
 
-    public Player(String name) {
+    public Player(String name, int playerBalance) {
         this.name = name;
+        this.playerBalance = playerBalance;
     }
 
     public void setPlayerCards(ArrayList<Card> playerCards) {
@@ -16,6 +18,18 @@ public class Player {
                 System.out.println(playerCard.toString());
             }
         }
+    }
+
+    void fold() {
+        this.playerCards.clear();
+    }
+
+    public int getPlayerBalance() {
+        return playerBalance;
+    }
+
+    public void setPlayerBalance(int playerBalance) {
+        this.playerBalance = playerBalance;
     }
 
     public String toString() {
