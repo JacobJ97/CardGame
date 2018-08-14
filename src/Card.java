@@ -11,6 +11,14 @@ public class Card {
         suit = suits[suitIndex];
     }
 
+    public String getRank() {
+        return rank;
+    }
+
+    public String getSuit() {
+        return suit;
+    }
+
     public String toString() {
         return rank + " of " + suit;
     }

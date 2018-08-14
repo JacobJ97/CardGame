@@ -33,5 +33,4 @@ public class Deck {
         }
         return cardsDealt;
     }
-
 }
