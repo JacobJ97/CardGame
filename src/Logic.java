@@ -51,7 +51,6 @@ public class Logic {
 
     Map<Player, Integer> findingPairs(int[] cardsInt) {
         Arrays.sort(cardsInt);
-        System.out.println(Arrays.toString(cardsInt));
 
         Map<Player, Integer> handRankingSystem = new HashMap<>();
 
@@ -119,7 +118,6 @@ public class Logic {
             cardAndSuit.put(cardsInt[i], cardsSuit[i]);
         }
         Map<Integer, String> sortedCardAndSuit = new TreeMap<>(cardAndSuit);
-        //System.out.println(sortedCardAndSuit);
         int[] cardsIntUnique = Arrays.stream(cardsInt).distinct().toArray();
         Arrays.sort(cardsIntUnique);
         int k = 0;
@@ -149,7 +147,6 @@ public class Logic {
                         sortedCardAndSuit.remove(keysForMap[r]);
                     }
                 }
-                System.out.println(sortedCardAndSuit);
                 String[] suitsArray = new String[5];
                 for (int l = 0; l < storedCardsUniqueInt.size(); l++) {
                     int card = storedCardsUniqueInt.get(l);
