@@ -31,6 +31,7 @@ public class Game {
 
     private static void startGame(int[] settings) {
         Deck cards = new Deck();
+
         Pot pot = new Pot(settings[0] / 100, settings[0] / 50);
         Player[] players = new Player[settings[1]];
 
@@ -41,8 +42,14 @@ public class Game {
             playerState.put(playerIDS.get(String.valueOf(i)), true);
         }
         //game loop
+        int numberOfMoves = turnInfo.length;
         ArrayList<Player> currentPlayers = new ArrayList<>(Arrays.asList(players));
-        for (int turnNumber = 0; turnNumber < turnInfo.length; turnNumber++) {
+        CommunityCards tableCards = new CommunityCards();
+        for (int turnNumber = 0; turnNumber < numberOfMoves; turnNumber++) {
+            if (turnNumber >= 1) {
+                ArrayList<Card> cardsOnTable = cards.dealCards(turnInfo[turnNumber]);
+                tableCards.setTableCards(cardsOnTable);
+            }
             messagesInGame(turnNumber);
             for (int playerTurn = 0; playerTurn < currentPlayers.size(); playerTurn++) {
                 inputsInGame(currentPlayers.get(playerTurn), playerTurn, pot);
