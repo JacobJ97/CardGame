@@ -13,7 +13,7 @@ public class Player {
 
     public void setPlayerCards(ArrayList<Card> playerCards) {
         this.playerCards = playerCards;
-        if (this.name == "Player_ID") {
+        if (this.name.equals("Player_ID")) {
             for (Card playerCard : playerCards) {
                 System.out.println(playerCard.toString());
             }

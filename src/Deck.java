@@ -20,9 +20,7 @@ public class Deck {
                 cards.add(new Card(j, i));
             }
         }
-        System.out.println(cards);
         Collections.shuffle(cards);
-        System.out.println(cards);
     }
 
     ArrayList<Card> dealCards(int numDealt) {
