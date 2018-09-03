@@ -8,11 +8,10 @@ import java.util.Map;
 class LogicTest {
 
     private Logic logic;
-    private Object[] cardInfo;
-    private ArrayList<Card> dealtCards;
     private Player player;
     private String[] cardsSuitArray;
     private int[] cardsIntArray;
+    private Map<Player, Integer[]> results;
 
     @BeforeAll
     static void beforeAll() {
@@ -23,12 +22,12 @@ class LogicTest {
     void beforeEach() {
         Deck cards = new Deck();
         this.player = new Player("bob", 500);
-        this.dealtCards = cards.dealCards(7);
+        ArrayList<Card> dealtCards = cards.dealCards(7);
         //System.out.println(dealtCards);
         this.logic = new Logic(dealtCards, player);
-        cardInfo = logic.determineHandRanking();
-        cardsSuitArray = (String[])cardInfo[0];
-        cardsIntArray = (int[])cardInfo[1];
+        Object[] cardInfo = logic.determineHandRanking();
+        cardsSuitArray = (String[]) cardInfo[0];
+        cardsIntArray = (int[]) cardInfo[1];
     }
 
     @AfterEach
@@ -41,25 +40,37 @@ class LogicTest {
 
     }
 
-    @Test
+    /*@Test
     @DisplayName("Pairs Results")
     @RepeatedTest(100)
     void pairs() {
-         Map<Player, Integer> results = logic.findingPairs(cardsIntArray);
+         results = logic.findingPairs(cardsIntArray);
          int result = results.get(player);
-         if (result == 1 || result == 2 || result == 3 || result == 6 || result == 7) {
+         if (result == 2 || result == 3 || result == 4 || result == 7 || result == 8) {
              System.out.println("Pair GOT: " + result + "\n");
          }
-    }
+    }*/
+
+    /*@Test
+    @DisplayName("Straights Results")
+    @RepeatedTest(2000)
+    void straights() {
+        results = logic.findStraights(cardsIntArray, cardsSuitArray);
+        int result = results.get(player)[0];
+        if (result == 5 || result == 9 || result == 10) {
+            System.out.println("Straight GOT: " + result + "\n");
+        }
+    }*/
 
     @Test
-    @DisplayName("Straights Results")
+    @DisplayName("Flush Results")
     @RepeatedTest(100)
-    void straights() {
-        Map<Player, Integer> results = logic.findStraights(cardsIntArray, cardsSuitArray);
-        int result = results.get(player);
-        if (result == 4 || result == 9 || result == 10) {
-            System.out.println("Straight GOT: " + result + "\n");
+    void flushes() {
+        results = logic.findFlush(cardsIntArray, cardsSuitArray);
+        Integer[] result = results.get(player);
+        if (result[0] == 6) {
+            System.out.println("Flush GOT: " + result[0] + "\n");
+            System.out.println("Hand Rank: " + result[1] + "\n");
         }
     }
 }

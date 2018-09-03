@@ -19,18 +19,22 @@ public class Logic {
 
     private ArrayList<Card> cardsToCompare;
     private Player player;
+    private boolean isFlush;
     private static final String[] cardString = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
     private static Map<String, Integer> cardIntValue = new HashMap<>() {{
         for (int i = 0; i < cardString.length; i++) {
             put(cardString[i], i + 1);
         }
     }};
+    private static Map<Player, Integer[]> handRankingSystem =  new HashMap<>();
     private int handRank = 0;
+    private int highCardRank = 0;
 
 
     public Logic(ArrayList<Card> cardsToCompare, Player player) {
         this.cardsToCompare = cardsToCompare;
         this.player = player;
+        handRankingSystem.put(player, new Integer[]{handRank, highCardRank});
     }
 
     private int getCardIntValue(String rank) {
@@ -46,73 +50,58 @@ public class Logic {
             cardIntArray[i] = getCardIntValue(card.getRank());
             i++;
         }
+
         return new Object[] {cardSuitArray, cardIntArray};
     }
 
-    Map<Player, Integer> findingPairs(int[] cardsInt) {
+    Map<Player, Integer[]> findingPairs(int[] cardsInt) {
         Arrays.sort(cardsInt);
 
-        Map<Player, Integer> handRankingSystem = new HashMap<>();
-
         for (int i = 1; i < cardsInt.length; i++) {
-            int tempRank;
             //pair
             if (cardsInt[i] == cardsInt[i - 1]) {
                 if (i == 6) {
-                    tempRank = 1;
-                    if (tempRank > handRank) {
-                        handRank = tempRank;
-                    }
+                    rankSetter(2);
+                    highCardRank = (cardsInt[i] * 2);
                 } else {
                     if (cardsInt[i] == cardsInt[i + 1]) {
                         if (i == cardsInt.length - 2) {
-                            tempRank = 3;
-                            if (tempRank > handRank) {
-                                handRank = tempRank;
-                            }
+                            rankSetter(4);
+                            highCardRank = (cardsInt[i] * 3);
                         } else {
                             //four of a kind
                             if (cardsInt[i] == cardsInt[i + 2]) {
-                                tempRank = 7;
-                                if (tempRank > handRank) {
-                                    handRank = tempRank;
-                                }
+                                rankSetter(8);
+                                highCardRank = (cardsInt[i] * 4);
                                 continue;
                             }
                         }
                     }
                 }
-                tempRank = 1;
-                if (tempRank > handRank) {
-                    handRank = tempRank;
-                }
-                //three pair
+                rankSetter(2);
+                //full house
                 for (int j = i; j < cardsInt.length - 2; j++) {
                     if (cardsInt[j] == cardsInt[j + 1]) {
                         if (cardsInt[j] == cardsInt[j + 2]) {
-                            tempRank = 6;
-                            if (tempRank > handRank) {
-                                handRank = tempRank;
-                            }
+                            rankSetter(7);
+                            highCardRank =+ cardsInt[j] * 3;
                         }
                     }
                 }
                 //two pair
                 for (int j = i; j < cardsInt.length - 1; j++) {
                     if (cardsInt[j] == cardsInt[j + 1]) {
-                        tempRank = 2;
-                        if (tempRank > handRank) {
-                            handRank = tempRank;
-                        }
+                        rankSetter(3);
+                        highCardRank =+ cardsInt[j] * 2;
                     }
                 }
             }
         }
-        handRankingSystem.put(player, handRank);
+        handRankingSystem.put(player, new Integer[]{handRank, highCardRank});
         return handRankingSystem;
     }
 
-    Map<Player, Integer> findStraights(int[] cardsInt, String[] cardsSuit) {
+    Map<Player, Integer[]> findStraights(int[] cardsInt, String[] cardsSuit) {
         Map<Integer, String> cardAndSuit = new HashMap<>();
         for (int i = 0; i < cardsToCompare.size(); i++) {
             cardAndSuit.put(cardsInt[i], cardsSuit[i]);
@@ -122,10 +111,10 @@ public class Logic {
         Arrays.sort(cardsIntUnique);
         int k = 0;
         ArrayList<Integer> storedCardsUniqueInt = new ArrayList<>();
-        Map<Player, Integer> handRankingSystem = new HashMap<>();
 
-        int tempRank;
+
         boolean passed;
+        boolean notStraight = true;
         for (int j = 0; j < cardsIntUnique.length - 1; j++) {
             if ((cardsIntUnique[j] + 1) == cardsIntUnique[j+1]) {
                 storedCardsUniqueInt.add(cardsIntUnique[j]);
@@ -138,8 +127,18 @@ public class Logic {
             if (!passed) {
                 k = 0;
             }
-            else if (k == 4) {
+            if (j < cardsIntUnique.length - 2 && k != 0) {
+                notStraight = cardsIntUnique[j] + 2 != cardsIntUnique[j + 2];
+            }
+            if (k >= 4 && notStraight) {
                 storedCardsUniqueInt.add(cardsIntUnique[j+1]);
+                System.out.println(storedCardsUniqueInt);
+                int straightLength = storedCardsUniqueInt.size();
+                if (straightLength > 5) {
+                    for (int x = 0; x < straightLength - 5; x++) {
+                        storedCardsUniqueInt.remove(x);
+                    }
+                }
                 Object[] keysForMap = sortedCardAndSuit.keySet().toArray();
                 int counterMap = sortedCardAndSuit.size();
                 for (int r = 0 ; r < counterMap; r++) {
@@ -147,18 +146,11 @@ public class Logic {
                         sortedCardAndSuit.remove(keysForMap[r]);
                     }
                 }
-                String[] suitsArray = new String[5];
-                for (int l = 0; l < storedCardsUniqueInt.size(); l++) {
-                    int card = storedCardsUniqueInt.get(l);
-                    String suit = sortedCardAndSuit.get(card);
-                    suitsArray[l] = suit;
+                for (Integer aStoredCardsUniqueInt : storedCardsUniqueInt) {
+                    highCardRank = aStoredCardsUniqueInt;
                 }
-                String[] suitsArrayUnique = new HashSet<>(Arrays.asList(suitsArray)).toArray(new String[0]);
-                if (suitsArrayUnique.length == 1) {
-                    tempRank = 9;
-                    if (tempRank > handRank) {
-                        handRank = tempRank;
-                    }
+                if (isFlush) {
+                    rankSetter(9);
                     int x = 0;
                     for (int m = 0; m < storedCardsUniqueInt.size(); m++) {
                         String cardFaceValue = getCardHand(storedCardsUniqueInt.get(m));
@@ -169,26 +161,55 @@ public class Logic {
                         }
                     }
                     if (x == 5) {
-                        tempRank = 10;
-                        if (tempRank > handRank) {
-                            handRank = tempRank;
-                        }
+                        rankSetter(10);
                     }
                 }
-                tempRank = 4;
-                if (tempRank > handRank) {
-                    handRank = tempRank;
-                }
+                rankSetter(5);
             }
         }
 
-        handRankingSystem.put(player,handRank);
+        handRankingSystem.put(player,new Integer[]{handRank,highCardRank});
         return handRankingSystem;
     }
 
+    Map<Player, Integer[]> findFlush(int[] cardsInt, String[] cardsSuit) {
+        Map<String, Integer> suitAndQty = new HashMap<>();
+        Map<String, List<Integer>> suitAndCard = new HashMap<>();
+        int s = 0;
+        for (String x : cardsSuit) {
+            if (!suitAndQty.containsKey(x)) {
+                suitAndQty.put(x, 1);
+                suitAndCard.put(x, new ArrayList<>());
+                suitAndCard.get(x).add(cardsInt[s]);
+            }
+            else {
+                suitAndQty.put(x, suitAndQty.get(x) + 1);
+                suitAndCard.get(x).add(cardsInt[s]);
+                suitAndCard.put(x, suitAndCard.get(x));
+            }
+            s++;
+        }
+        isFlush = false;
+        for (String key : suitAndQty.keySet()) {
+            if (suitAndQty.get(key) >= 5) {
+                rankSetter(6);
+                for (int c = 0; c < suitAndQty.get(key); c++) {
+                    int a = suitAndCard.get(key).get(c);
+                    highCardRank += a;
+                }
+            }
+        }
+        handRankingSystem.put(player,new Integer[]{handRank, highCardRank});
+        return handRankingSystem;
+    }
+
+    private void rankSetter(int tempRank) {
+        if (tempRank > handRank) {
+            handRank = tempRank;
+        }
+    }
 
     private String getCardHand(int value) {
         return cardString[value - 1];
     }
-
 }
