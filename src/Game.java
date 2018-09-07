@@ -15,6 +15,7 @@ public class Game {
     private static final int FLOP = 3;
     private static final int TURN = 1;
     private static final int RIVER = 1;
+    private static final int ALL_CARDS_DRAWN = INITIAL_DRAW_TO_PLAYERS + FLOP + TURN + RIVER;
     private static final int[] turnInfo = {INITIAL_DRAW_TO_PLAYERS, FLOP, TURN, RIVER};
 
     //TODO: Program betting and stuff
@@ -60,6 +61,15 @@ public class Game {
                 }
             }
         }
+        //calculating the winner
+        for (int playerHand = 0; playerHand < currentPlayers.size(); playerHand++) {
+            ArrayList<Card> allCards = new ArrayList<>();
+            allCards.addAll(players[playerHand].getPlayerCards());
+            allCards.addAll(tableCards.getTableCards());
+            Logic logic = new Logic(allCards, players[playerHand]);
+            Object[] handInformation = logic.determineHand();
+        }
+
     }
 
     private static void messagesInGame(int turnNumber) {
@@ -86,25 +96,29 @@ public class Game {
             System.out.println("$" + playerBalance);
             s.next();
         }
-        if (move.equals("call")) {
-            int call = pot.getCallTotal();
-            pot.setPotTotal(call);
-            player.setPlayerBalance(player.getPlayerBalance() - call);
-            System.out.println("You have called a total of $" + call);
-        }
-        else if (move.equals("raise")) {
-            int call = pot.getCallTotal();
-            System.out.println("How much do you want to raise it by? Current bet is at $" + call);
-            int raiseAmount = s.nextInt();
-            pot.setPotTotal(call + raiseAmount);
-            player.setPlayerBalance(player.getPlayerBalance() - (call + raiseAmount));
-        }
-        else if (move.equals("fold")) {
-            player.fold();
-            playerState.put(playerIDS.get(String.valueOf(index)), false);
-        }
-        else {
-            System.out.println("HI JAKE!!! CAN YOU PLEASE PLEASE PLEASE FOCUS ON HUGGING ME AND NOT YOUR DAMN PROGRAMMING!!!!????");
+        switch (move) {
+            case "call": {
+                int call = pot.getCallTotal();
+                pot.setPotTotal(call);
+                player.setPlayerBalance(player.getPlayerBalance() - call);
+                System.out.println("You have called a total of $" + call);
+                break;
+            }
+            case "raise": {
+                int call = pot.getCallTotal();
+                System.out.println("How much do you want to raise it by? Current bet is at $" + call);
+                int raiseAmount = s.nextInt();
+                pot.setPotTotal(call + raiseAmount);
+                player.setPlayerBalance(player.getPlayerBalance() - (call + raiseAmount));
+                break;
+            }
+            case "fold":
+                player.fold();
+                playerState.put(playerIDS.get(String.valueOf(index)), false);
+                break;
+            default:
+                System.out.println("opps");
+                break;
         }
     }
 
@@ -122,9 +136,7 @@ public class Game {
             playerIDS.put(String.valueOf(i), "Computer_" + i);
             playerState.put(playerIDS.get(String.valueOf(i)), true);
         }
-        System.out.println("Number of decks in hand?");
-        int numOfDecks = s.nextInt();
-        return new int[]{playerBalance, numOfPlayers, numOfDecks};
+        return new int[]{playerBalance, numOfPlayers};
     }
 
     private static void inputsAtStart() {

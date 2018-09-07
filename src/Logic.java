@@ -20,6 +20,8 @@ public class Logic {
     private ArrayList<Card> cardsToCompare;
     private Player player;
     private boolean isFlush;
+    private boolean isStraight;
+    private Object[] cardInfo;
     private static final String[] cardString = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
     private static Map<String, Integer> cardIntValue = new HashMap<>() {{
         for (int i = 0; i < cardString.length; i++) {
@@ -29,12 +31,19 @@ public class Logic {
     private static Map<Player, Integer[]> handRankingSystem =  new HashMap<>();
     private int handRank = 0;
     private int highCardRank = 0;
+    private ArrayList<Integer> highCardNumbers = new ArrayList<>();
+    private ArrayList<Integer> highCardNumbersSeperate = new ArrayList<>();
+    private boolean twoPair;
+    private boolean fullHouse;
+    private boolean fourOfAKind;
+    private boolean threeOfAKind;
 
 
     public Logic(ArrayList<Card> cardsToCompare, Player player) {
         this.cardsToCompare = cardsToCompare;
         this.player = player;
         handRankingSystem.put(player, new Integer[]{handRank, highCardRank});
+        cardInfo = determineHandRanking();
     }
 
     private int getCardIntValue(String rank) {
@@ -54,54 +63,110 @@ public class Logic {
         return new Object[] {cardSuitArray, cardIntArray};
     }
 
-    Map<Player, Integer[]> findingPairs(int[] cardsInt) {
-        Arrays.sort(cardsInt);
+    void findingPairs(int[] cardsNum) {
+        Integer[] cardsInt = Arrays.stream(cardsNum).boxed().toArray(Integer[]::new);
+        ArrayList<Integer> singlePair = new ArrayList<>();
+        Arrays.sort(cardsInt, Collections.reverseOrder());
 
         for (int i = 1; i < cardsInt.length; i++) {
             //pair
-            if (cardsInt[i] == cardsInt[i - 1]) {
-                if (i == 6) {
-                    rankSetter(2);
-                    highCardRank = (cardsInt[i] * 2);
+            if (cardsInt[i].equals(cardsInt[i - 1])) {
+                singlePair.addAll(Arrays.asList(cardsInt[i], cardsInt[i - 1]));
+                if (i == cardsInt.length - 1) {
+                    continue;
                 } else {
-                    if (cardsInt[i] == cardsInt[i + 1]) {
+                    if (cardsInt[i].equals(cardsInt[i + 1])) {
                         if (i == cardsInt.length - 2) {
-                            rankSetter(4);
-                            highCardRank = (cardsInt[i] * 3);
+                            if (!threeOfAKind && !fourOfAKind && !fullHouse) {
+                                rankSetter(4);
+                                highCardNumbers.addAll(Arrays.asList(cardsInt[i], cardsInt[i - 1], cardsInt[i + 1]));
+                                threeOfAKind = true;
+                            }
                         } else {
                             //four of a kind
-                            if (cardsInt[i] == cardsInt[i + 2]) {
+                            if (cardsInt[i].equals(cardsInt[i + 2])) {
                                 rankSetter(8);
-                                highCardRank = (cardsInt[i] * 4);
-                                continue;
+                                if (isFlush && isStraight) {
+                                    continue;
+                                } else {
+                                    highCardNumbers.addAll(Arrays.asList(cardsInt[i], cardsInt[i - 1], cardsInt[i + 1], cardsInt[i + 2]));
+                                    fourOfAKind = true;
+                                    break;
+                                }
+                            }
+                        }
+                        //full house
+                        if (!fullHouse) {
+                            for (int j = (i + 2); j < cardsInt.length - 1; j++) {
+                                if (cardsInt[j].equals(cardsInt[j + 1])) {
+                                    rankSetter(7);
+                                    if (isStraight && isFlush) {} else {
+                                        highCardNumbers.addAll(Arrays.asList(cardsInt[j], cardsInt[j + 1]));
+                                        fullHouse = true;
+                                        break;
+                                    }
+
+                                }
+                            }
+                            if (fullHouse) {
+                                highCardNumbers.add(0, cardsInt[i - 1]);
+                                highCardNumbers.add(1, cardsInt[i]);
+                                highCardNumbers.add(2, cardsInt[i + 1]);
+                            }
+                        }
+                        if (!fullHouse && !threeOfAKind) {
+                            rankSetter(4);
+                            highCardNumbers.addAll(Arrays.asList(cardsInt[i], cardsInt[i - 1], cardsInt[i + 1]));
+                            threeOfAKind = true;
+                        }
+                    }
+                }
+                //full house
+                if (!fullHouse) {
+                    for (int j = (i + 1); j < cardsInt.length - 2; j++) {
+                        if (cardsInt[j].equals(cardsInt[j + 1])) {
+                            if (cardsInt[j].equals(cardsInt[j + 2])) {
+                                rankSetter(7);
+                                if (isFlush && isStraight) {} else {
+                                    highCardNumbers.addAll(Arrays.asList(cardsInt[j], cardsInt[j + 1], cardsInt[j + 2]));
+                                    fullHouse = true;
+                                    break;
+                                }
                             }
                         }
                     }
-                }
-                rankSetter(2);
-                //full house
-                for (int j = i; j < cardsInt.length - 2; j++) {
-                    if (cardsInt[j] == cardsInt[j + 1]) {
-                        if (cardsInt[j] == cardsInt[j + 2]) {
-                            rankSetter(7);
-                            highCardRank =+ cardsInt[j] * 3;
-                        }
+                    if (fullHouse) {
+                        highCardNumbers.add(0, cardsInt[i - 1]);
+                        highCardNumbers.add(1, cardsInt[i]);
                     }
                 }
                 //two pair
-                for (int j = i; j < cardsInt.length - 1; j++) {
-                    if (cardsInt[j] == cardsInt[j + 1]) {
-                        rankSetter(3);
-                        highCardRank =+ cardsInt[j] * 2;
+                if (!twoPair && !fullHouse) {
+                    for (int j = (i + 1); j < cardsInt.length - 1; j++) {
+                        if (cardsInt[j].equals(cardsInt[j + 1])) {
+                            rankSetter(3);
+                            if (!isFlush && !isStraight) {
+                                highCardNumbers.addAll(Arrays.asList(cardsInt[j], cardsInt[j + 1]));
+                                twoPair = true;
+                            }
+                            break;
+                        }
+                    }
+                    if (twoPair) {
+                        highCardNumbers.add(0, cardsInt[i - 1]);
+                        highCardNumbers.add(1, cardsInt[i]);
                     }
                 }
             }
         }
-        handRankingSystem.put(player, new Integer[]{handRank, highCardRank});
-        return handRankingSystem;
+
+        if ((!twoPair && !threeOfAKind && !fourOfAKind && !fullHouse & !isFlush && !isStraight) && singlePair.size() == 2) {
+            highCardNumbers.addAll(singlePair);
+            rankSetter(2);
+        }
     }
 
-    Map<Player, Integer[]> findStraights(int[] cardsInt, String[] cardsSuit) {
+    void findStraights(int[] cardsInt, String[] cardsSuit) {
         Map<Integer, String> cardAndSuit = new HashMap<>();
         for (int i = 0; i < cardsToCompare.size(); i++) {
             cardAndSuit.put(cardsInt[i], cardsSuit[i]);
@@ -114,7 +179,7 @@ public class Logic {
 
 
         boolean passed;
-        boolean notStraight = true;
+        boolean nextNotStraight = true;
         for (int j = 0; j < cardsIntUnique.length - 1; j++) {
             if ((cardsIntUnique[j] + 1) == cardsIntUnique[j+1]) {
                 storedCardsUniqueInt.add(cardsIntUnique[j]);
@@ -128,17 +193,20 @@ public class Logic {
                 k = 0;
             }
             if (j < cardsIntUnique.length - 2 && k != 0) {
-                notStraight = cardsIntUnique[j] + 2 != cardsIntUnique[j + 2];
+                nextNotStraight = cardsIntUnique[j] + 2 != cardsIntUnique[j + 2];
+            } else if (j >= cardsIntUnique.length - 1) {
+                nextNotStraight = true;
             }
-            if (k >= 4 && notStraight) {
+            if (k >= 4 && nextNotStraight) {
+                isStraight = true;
                 storedCardsUniqueInt.add(cardsIntUnique[j+1]);
-                System.out.println(storedCardsUniqueInt);
                 int straightLength = storedCardsUniqueInt.size();
                 if (straightLength > 5) {
                     for (int x = 0; x < straightLength - 5; x++) {
                         storedCardsUniqueInt.remove(x);
                     }
                 }
+                highCardNumbers.addAll(storedCardsUniqueInt);
                 Object[] keysForMap = sortedCardAndSuit.keySet().toArray();
                 int counterMap = sortedCardAndSuit.size();
                 for (int r = 0 ; r < counterMap; r++) {
@@ -146,10 +214,9 @@ public class Logic {
                         sortedCardAndSuit.remove(keysForMap[r]);
                     }
                 }
-                for (Integer aStoredCardsUniqueInt : storedCardsUniqueInt) {
-                    highCardRank = aStoredCardsUniqueInt;
-                }
                 if (isFlush) {
+                    highCardNumbers.clear();
+                    highCardNumbers.addAll(storedCardsUniqueInt);
                     rankSetter(9);
                     int x = 0;
                     for (int m = 0; m < storedCardsUniqueInt.size(); m++) {
@@ -167,15 +234,12 @@ public class Logic {
                 rankSetter(5);
             }
         }
-
-        handRankingSystem.put(player,new Integer[]{handRank,highCardRank});
-        return handRankingSystem;
     }
 
-    Map<Player, Integer[]> findFlush(int[] cardsInt, String[] cardsSuit) {
+    void findFlush(int[] cardsInt, String[] cardsSuit) {
         Map<String, Integer> suitAndQty = new HashMap<>();
         Map<String, List<Integer>> suitAndCard = new HashMap<>();
-        int s = 0;
+        int s = cardsInt.length - 1;
         for (String x : cardsSuit) {
             if (!suitAndQty.containsKey(x)) {
                 suitAndQty.put(x, 1);
@@ -187,20 +251,46 @@ public class Logic {
                 suitAndCard.get(x).add(cardsInt[s]);
                 suitAndCard.put(x, suitAndCard.get(x));
             }
-            s++;
+            s--;
         }
         isFlush = false;
         for (String key : suitAndQty.keySet()) {
             if (suitAndQty.get(key) >= 5) {
+                isFlush = true;
                 rankSetter(6);
                 for (int c = 0; c < suitAndQty.get(key); c++) {
-                    int a = suitAndCard.get(key).get(c);
-                    highCardRank += a;
+                    highCardNumbers.add(suitAndCard.get(key).get(c));
                 }
             }
         }
-        handRankingSystem.put(player,new Integer[]{handRank, highCardRank});
-        return handRankingSystem;
+    }
+
+    void findTopCards(int[] cardsIntArray) {
+        Arrays.sort(cardsIntArray);
+        int counter;
+        if (cardsIntArray.length <= 5) {
+            counter = 0;
+        } else {
+            counter = cardsIntArray.length - 5;
+        }
+        for (var c = cardsIntArray.length - 1; c >= counter; c--) {
+            highCardNumbersSeperate.add(cardsIntArray[c]);
+        }
+    }
+
+    Object[] determineHand() {
+        String[] cardsSuitArray = (String[])cardInfo[0];
+        int[] cardsIntArray = (int[])cardInfo[1];
+        findFlush(cardsIntArray, cardsSuitArray);
+        findStraights(cardsIntArray, cardsSuitArray);
+        findingPairs(cardsIntArray);
+        findTopCards(cardsIntArray);
+        if (isFlush || isStraight) {
+            return new Object[]{handRank, highCardNumbers};
+        }
+        else {
+            return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate};
+        }
     }
 
     private void rankSetter(int tempRank) {

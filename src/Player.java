@@ -6,18 +6,22 @@ public class Player {
     private int playerBalance;
     private String name;
 
-    public Player(String name, int playerBalance) {
+    Player(String name, int playerBalance) {
         this.name = name;
         this.playerBalance = playerBalance;
     }
 
-    public void setPlayerCards(ArrayList<Card> playerCards) {
+    void setPlayerCards(ArrayList<Card> playerCards) {
         this.playerCards = playerCards;
         if (this.name.equals("Player_ID")) {
             for (Card playerCard : playerCards) {
                 System.out.println(playerCard.toString());
             }
         }
+    }
+
+    public ArrayList<Card> getPlayerCards() {
+        return playerCards;
     }
 
     void fold() {
