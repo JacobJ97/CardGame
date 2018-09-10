@@ -10,9 +10,7 @@ public class CommunityCards {
 
     void setTableCards(ArrayList<Card> tableCards) {
         communityCards.addAll(tableCards);
-        for (Card tableCard : tableCards) {
-            System.out.println(tableCard.toString());
-        }
+        System.out.println(communityCards.toString());
     }
 
     ArrayList<Card> getTableCards() {

@@ -13,10 +13,9 @@ public class Player {
 
     void setPlayerCards(ArrayList<Card> playerCards) {
         this.playerCards = playerCards;
-        if (this.name.equals("Player_ID")) {
-            for (Card playerCard : playerCards) {
-                System.out.println(playerCard.toString());
-            }
+        System.out.println(name + " has the cards: ");
+        for (Card playerCard : playerCards) {
+            System.out.println(playerCard);
         }
     }
 
@@ -37,6 +36,6 @@ public class Player {
     }
 
     public String toString() {
-        return (name + ": Your cards are \n" + playerCards);
+        return (name);
     }
 }

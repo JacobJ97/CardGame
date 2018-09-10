@@ -2,8 +2,8 @@ public class Pot {
 
     private int smallBlind;
     private int bigBlind;
-    public int totalPot;
-    public int callTotal;
+    private int totalPot;
+    private int callTotal;
 
     Pot(int smallBlind, int bigBlind) {
         this.smallBlind = smallBlind;

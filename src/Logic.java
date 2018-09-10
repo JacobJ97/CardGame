@@ -28,9 +28,7 @@ public class Logic {
             put(cardString[i], i + 1);
         }
     }};
-    private static Map<Player, Integer[]> handRankingSystem =  new HashMap<>();
     private int handRank = 0;
-    private int highCardRank = 0;
     private ArrayList<Integer> highCardNumbers = new ArrayList<>();
     private ArrayList<Integer> highCardNumbersSeperate = new ArrayList<>();
     private boolean twoPair;
@@ -42,7 +40,6 @@ public class Logic {
     public Logic(ArrayList<Card> cardsToCompare, Player player) {
         this.cardsToCompare = cardsToCompare;
         this.player = player;
-        handRankingSystem.put(player, new Integer[]{handRank, highCardRank});
         cardInfo = determineHandRanking();
     }
 
@@ -276,6 +273,7 @@ public class Logic {
         for (var c = cardsIntArray.length - 1; c >= counter; c--) {
             highCardNumbersSeperate.add(cardsIntArray[c]);
         }
+        rankSetter(1);
     }
 
     Object[] determineHand() {
@@ -286,7 +284,7 @@ public class Logic {
         findingPairs(cardsIntArray);
         findTopCards(cardsIntArray);
         if (isFlush || isStraight) {
-            return new Object[]{handRank, highCardNumbers};
+            return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate};
         }
         else {
             return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate};
