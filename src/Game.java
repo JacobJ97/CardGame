@@ -10,6 +10,9 @@ public class Game {
     private static Map<String, String> playerIDS = new HashMap<>();
     private static Map<String, Boolean> playerState = new HashMap<>();
 
+    private static String[] cardRanksString = {"High Card", "Pair", "Two Pair", "Three of a Kind", "Straight", "Flush",
+    "Full House", "Four of a Kind", "Straight Flush", "Royal Flush"};
+
     /** Card move info */
     private static final int INITIAL_DRAW_TO_PLAYERS = 2;
     private static final int FLOP = 3;
@@ -18,63 +21,115 @@ public class Game {
     private static final int ALL_CARDS_DRAWN = INITIAL_DRAW_TO_PLAYERS + FLOP + TURN + RIVER;
     private static final int[] turnInfo = {INITIAL_DRAW_TO_PLAYERS, FLOP, TURN, RIVER};
 
-    //TODO: Program betting and stuff
-    //TODO: Program in the flop/turn/river
-    //TODO: Better management of Player class (does bot get own class?)
+    //TODO: Fix Head2Head problems
+    //TODO: Fix Game Class problems
+    //TODO: Refactor code
 
     public static void main(String []args) {
         displayMenu();
         inputsAtStart();
         int[] settings = initSettings();
-        startGame(settings);
+        playGame(settings);
         System.out.println("Done!");
     }
 
-    private static void startGame(int[] settings) {
-        Deck cards = new Deck();
-
+    private static void playGame(int[] settings) {
         Pot pot = new Pot(settings[0] / 100, settings[0] / 50);
         Player[] players = new Player[settings[1]];
+        boolean playing = true;
 
-        for (int i = 0; i < players.length; i++) {
-            players[i] = new Player(playerIDS.get(String.valueOf(i)), settings[0]);
-            ArrayList<Card> dealtCards = cards.dealCards(INITIAL_DRAW_TO_PLAYERS);
-            players[i].setPlayerCards(dealtCards);
-            playerState.put(playerIDS.get(String.valueOf(i)), true);
-        }
-        //game loop
-        int numberOfMoves = turnInfo.length;
-        ArrayList<Player> currentPlayers = new ArrayList<>(Arrays.asList(players));
-        CommunityCards tableCards = new CommunityCards();
-        for (int turnNumber = 0; turnNumber < numberOfMoves; turnNumber++) {
-            if (turnNumber >= 1) {
-                ArrayList<Card> cardsOnTable = cards.dealCards(turnInfo[turnNumber]);
-                tableCards.setTableCards(cardsOnTable);
+        while (playing) {
+            Deck cards = new Deck();
+            for (int i = 0; i < players.length; i++) {
+                players[i] = new Player(playerIDS.get(String.valueOf(i)), settings[0]);
+                ArrayList<Card> dealtCards = cards.dealCards(INITIAL_DRAW_TO_PLAYERS);
+                players[i].setPlayerCards(dealtCards);
+                playerState.put(playerIDS.get(String.valueOf(i)), true);
             }
-            messagesInGame(turnNumber);
-            for (int playerTurn = 0; playerTurn < currentPlayers.size(); playerTurn++) {
-                inputsInGame(currentPlayers.get(playerTurn), playerTurn, pot);
-                int finalPlayerTurn = playerTurn;
-                currentPlayers.removeIf((Player player) -> !playerState.get(playerIDS.get(String.valueOf(String.valueOf(finalPlayerTurn)))));
-                if (currentPlayers.size() == 1) {
-                    System.out.println("You have won!");
+            //game loop
+            int numberOfMoves = turnInfo.length;
+            ArrayList<Player> currentPlayers = new ArrayList<>(Arrays.asList(players));
+            CommunityCards tableCards = new CommunityCards();
+            for (int turnNumber = 0; turnNumber < numberOfMoves; turnNumber++) {
+                if (turnNumber >= 1) {
+                    ArrayList<Card> cardsOnTable = cards.dealCards(turnInfo[turnNumber]);
+                    tableCards.setTableCards(cardsOnTable);
+                }
+                messagesInGame(turnNumber);
+                for (int playerTurn = 0; playerTurn < currentPlayers.size(); playerTurn++) {
+                    inputsInGame(currentPlayers.get(playerTurn), playerTurn, pot);
+                    int finalPlayerTurn = playerTurn;
+                    currentPlayers.removeIf((Player player) -> !playerState.get(playerIDS.get(String.valueOf(String.valueOf(finalPlayerTurn)))));
+                    if (currentPlayers.size() == 1) {
+                        System.out.println("You have won a total of $" + pot.getPotTotal());
+                        currentPlayers.get(0).setPlayerBalance(pot.getPotTotal());
+                    }
                 }
             }
-        }
-        //calculating the winner
-        for (int playerHand = 0; playerHand < currentPlayers.size(); playerHand++) {
-            ArrayList<Card> allCards = new ArrayList<>();
-            allCards.addAll(players[playerHand].getPlayerCards());
-            allCards.addAll(tableCards.getTableCards());
-            Logic logic = new Logic(allCards, players[playerHand]);
-            Object[] handInformation = logic.determineHand();
-        }
+            //calculating the winner
+            Map<Player, Object[]> allPlayerInfo = new HashMap<>();
+            for (int playerHand = 0; playerHand < currentPlayers.size(); playerHand++) {
+                ArrayList<Card> allCards = new ArrayList<>();
+                allCards.addAll(players[playerHand].getPlayerCards());
+                allCards.addAll(tableCards.getTableCards());
+                Logic logic = new Logic(allCards, players[playerHand]);
+                Object[] handInformation = logic.determineHand();
+                allPlayerInfo.put(players[playerHand], handInformation);
+            }
 
+            Head2Head head2head = new Head2Head(allPlayerInfo);
+            Object[] winnersInfo = head2head.determineWinner();
+            @SuppressWarnings("unchecked")
+            ArrayList<Player> winners = (ArrayList<Player>) winnersInfo[0];
+            int rank = (int)winnersInfo[1];
+            System.out.println(rank);
+            @SuppressWarnings("unchecked")
+            ArrayList<Integer> fff = (ArrayList<Integer>) winnersInfo[3];
+            if (winners.size() == 1) {
+                winners.get(0).setPlayerBalance(pot.getPotTotal());
+                System.out.print("Congrats " + winners.get(0) + ", you have won a total of $" + pot.getPotTotal() + " with a " + cardRanksString[rank - 1]);
+                if (rank == 2 || rank == 4 || rank == 8) {
+                    System.out.print(" of " + fff.get(0));
+                }
+                else if (rank == 3 || rank == 7) {
+                    System.out.print(" of " + fff.get(0) + "& " + fff.get(1));
+                }
+                else if (rank == 5 || rank == 9 || rank == 10) {
+                    System.out.print(" that is between " + fff.get(0) + "& " + fff.get(1));
+                }
+                else {
+                    System.out.print(" of //suit");
+                }
+            } else {
+                System.out.print("Congrats to ");
+                for (int j = 0; j < winners.size(); j++) {
+                    winners.get(j).setPlayerBalance(pot.getPotTotal() / winners.size());
+                    System.out.print(winners.get(j));
+                    if (winners.size() - j > 0) {
+                        System.out.print("& ");
+                    }
+                }
+                System.out.print(", you have won a total of $" + pot.getPotTotal() / winners.size());
+            }
+            System.out.println("Do you want to play again? Y or N");
+            Scanner s = new Scanner(System.in);
+            String playAgain = s.next();
+            while (!playAgain.equals("Y") || !playAgain.equals("N")) {
+                System.out.println("Invalid input...play again? Y or N");
+                playAgain = s.next();
+            }
+            if (playAgain.equals("Y")) {
+                System.out.println("Another game it is, have fun!");
+            } else {
+                System.out.println("You have ended the game with a total of $" + players[0].getPlayerBalance());
+                playing = false;
+            }
+        }
     }
 
     private static void messagesInGame(int turnNumber) {
         if (turnNumber == 0) {
-            System.out.println("We are current in pre-flop! What would you like to do?");
+            System.out.println("We are currently in pre-flop! What would you like to do?");
         }
         if (turnNumber == 1) {
             System.out.println("We have just witnessed the flop! Any idea on what happens now?");
@@ -88,7 +143,7 @@ public class Game {
     }
 
     private static void inputsInGame(Player player, int index, Pot pot) {
-        System.out.println("The total amount in the pot is: $" + pot.totalPot);
+        System.out.println("The total amount in the pot is: $" + pot.getPotTotal());
         Scanner s = new Scanner(System.in);
         String move = s.next();
         while (move.equals("cash")) {
@@ -133,8 +188,10 @@ public class Game {
                 playerIDS.put(String.valueOf(i), "Player");
                 playerState.put(playerIDS.get(String.valueOf(i)), true);
             }
-            playerIDS.put(String.valueOf(i), "Computer_" + i);
-            playerState.put(playerIDS.get(String.valueOf(i)), true);
+            else {
+                playerIDS.put(String.valueOf(i), "Computer_" + i);
+                playerState.put(playerIDS.get(String.valueOf(i)), true);
+            }
         }
         return new int[]{playerBalance, numOfPlayers};
     }
@@ -160,5 +217,4 @@ public class Game {
                 "command line, against the computer. Think you can handle it? Type \"start\" to begin! Or, press \"help\" " +
                 "for instructions on playing!");
     }
-
 }
