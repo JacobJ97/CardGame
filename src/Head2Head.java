@@ -5,6 +5,7 @@ public class Head2Head {
     private Map<Player, Object[]> allPlayerInfo;
     private int topHand;
     private int winningHighCard;
+    private Player winningPlayer;
     private Map<Player, Integer> topHandMap = new HashMap<>();
     private ArrayList<Player> playersWon = new ArrayList<>();
     private ArrayList<Integer> winningHandNums = new ArrayList<>();
@@ -46,33 +47,32 @@ public class Head2Head {
                 if (handRank == 5 || handRank == 6 || handRank == 9 || handRank == 10) {
                     Collections.reverse(handCards);
                 }
-                for (int i = handCards.size() - 1; i >= 0; i--) {
-                    System.out.println(handCards);
+                for (int i = 0; i < handCards.size(); i++) {
                     int a = handCards.get(i);
-                    int b = topHandMapCards.get(player).get(i);
+                    int b = topHandMapCards.get(winningPlayer).get(i);
                     if (a > b) {
                         isTie = false;
                         mapSetter(player, handRank, handCards, top5cards, true);
                         break;
-                    } else if (a == b) {continue;}
-                    else {
+                    } else if (a < b) {
                         break;
                     }
+                    else {continue;}
                 }
                 if (isTie) {
-                    for (int i = top5cards.size() - 1; i >= 0; i--) {
+                    for (int i = 0; i < handCards.size(); i++) {
                         int a = top5cards.get(i);
-                        int b = top5CardsMap.get(player).get(i);
+                        int b = top5CardsMap.get(winningPlayer).get(i);
                         if (a > b) {
                             isTie = false;
                             mapSetter(player, handRank, handCards, top5cards, true);
                             winningHighCard = a;
                             break;
-                        }
-                        else if (a == b) {continue;}
-                        else {
+                        } else if (b > a) {
                             break;
                         }
+                        else {continue;}
+
                     }
                     if (isTie) {
                         playersWon.add(player);
@@ -84,6 +84,7 @@ public class Head2Head {
 
     private void mapSetter(Player player, int handRank, ArrayList<Integer> handCards, ArrayList<Integer> top5cards, boolean eraseOld) {
         topHand = handRank;
+        winningPlayer = player;
         if (eraseOld) {
             topHandMap.clear();
             topHandMapCards.clear();
@@ -100,7 +101,7 @@ public class Head2Head {
             int[] convertToIntArray = handCards.stream().mapToInt(i -> i).toArray();
             distinctIntArray = Arrays.stream(convertToIntArray).distinct().toArray();
             for (int s = 0; s < distinctIntArray.length; s++) {
-                winningHandNums.add(s);
+                winningHandNums.add(distinctIntArray[s]);
             }
         }
         else if (handRank == 5 || handRank == 9 || handRank == 10) {
