@@ -24,8 +24,6 @@ public class Game {
     private static final int[] turnInfo = {INITIAL_DRAW_TO_PLAYERS, FLOP, TURN, RIVER};
     private static String suitFlush;
 
-    //TODO: Fix Head2Head problems
-    //TODO: Fix Game Class problems
     //TODO: Refactor code
 
     public static void main(String []args) {
@@ -120,7 +118,7 @@ public class Game {
             System.out.println("Do you want to play again? Y or N");
             Scanner s = new Scanner(System.in);
             String playAgain = s.next();
-            while (!playAgain.equals("Y") || !playAgain.equals("N")) {
+            while (!playAgain.equals("Y") && !playAgain.equals("N")) {
                 System.out.println("Invalid input...play again? Y or N");
                 playAgain = s.next();
             }
