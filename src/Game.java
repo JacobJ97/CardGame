@@ -13,6 +13,8 @@ public class Game {
     private static String[] cardRanksString = {"High Card", "Pair", "Two Pair", "Three of a Kind", "Straight", "Flush",
     "Full House", "Four of a Kind", "Straight Flush", "Royal Flush"};
 
+    private static String[] ranksInt = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
+
     /** Card move info */
     private static final int INITIAL_DRAW_TO_PLAYERS = 2;
     private static final int FLOP = 3;
@@ -20,6 +22,7 @@ public class Game {
     private static final int RIVER = 1;
     private static final int ALL_CARDS_DRAWN = INITIAL_DRAW_TO_PLAYERS + FLOP + TURN + RIVER;
     private static final int[] turnInfo = {INITIAL_DRAW_TO_PLAYERS, FLOP, TURN, RIVER};
+    private static String suitFlush;
 
     //TODO: Fix Head2Head problems
     //TODO: Fix Game Class problems
@@ -74,9 +77,11 @@ public class Game {
                 allCards.addAll(tableCards.getTableCards());
                 Logic logic = new Logic(allCards, players[playerHand]);
                 Object[] handInformation = logic.determineHand();
+                if (logic.getFlushSuit() != null) {
+                    suitFlush = logic.getFlushSuit();
+                }
                 allPlayerInfo.put(players[playerHand], handInformation);
             }
-
             Head2Head head2head = new Head2Head(allPlayerInfo);
             Object[] winnersInfo = head2head.determineWinner();
             @SuppressWarnings("unchecked")
@@ -89,28 +94,29 @@ public class Game {
                 winners.get(0).setPlayerBalance(pot.getPotTotal());
                 System.out.print("Congrats " + winners.get(0) + ", you have won a total of $" + pot.getPotTotal() + " with a " + cardRanksString[rank - 1]);
                 if (rank == 2 || rank == 4 || rank == 8) {
-                    System.out.print(" of " + fff.get(0));
+                    System.out.print(" of " + ranksInt[(fff.get(0) - 1)]);
                 }
                 else if (rank == 3 || rank == 7) {
-                    System.out.print(" of " + fff.get(0) + "& " + fff.get(1));
+                    System.out.print(" of " + ranksInt[(fff.get(0) - 1)] + "& " + ranksInt[(fff.get(1) - 1)]);
                 }
                 else if (rank == 5 || rank == 9 || rank == 10) {
-                    System.out.print(" that is between " + fff.get(0) + "& " + fff.get(1));
+                    System.out.print(" that is between " + ranksInt[(fff.get(0) - 1)] + "& " + ranksInt[(fff.get(1) - 1)]);
                 }
                 else {
-                    System.out.print(" of //suit");
+                    System.out.print(" of " + suitFlush);
                 }
             } else {
                 System.out.print("Congrats to ");
                 for (int j = 0; j < winners.size(); j++) {
                     winners.get(j).setPlayerBalance(pot.getPotTotal() / winners.size());
                     System.out.print(winners.get(j));
-                    if (winners.size() - j > 0) {
+                    if (winners.size() - j != 0) {
                         System.out.print("& ");
                     }
                 }
                 System.out.print(", you have won a total of $" + pot.getPotTotal() / winners.size());
             }
+            System.out.println("");
             System.out.println("Do you want to play again? Y or N");
             Scanner s = new Scanner(System.in);
             String playAgain = s.next();
@@ -149,7 +155,11 @@ public class Game {
         while (move.equals("cash")) {
             int playerBalance = player.getPlayerBalance();
             System.out.println("$" + playerBalance);
-            s.next();
+            move = s.next();
+        }
+        while (!move.equals("call") && !move.equals("raise") && !move.equals("fold")) {
+            System.out.println("That is not a proper input. You can either check your balance, call, raise or fold.");
+            move = s.next();
         }
         switch (move) {
             case "call": {
@@ -172,17 +182,31 @@ public class Game {
                 playerState.put(playerIDS.get(String.valueOf(index)), false);
                 break;
             default:
-                System.out.println("opps");
+                System.out.println("ponk");
                 break;
         }
     }
 
     private static int[] initSettings() {
+        int playerBalance = 0;
         Scanner s = new Scanner(System.in);
-        System.out.println("Each player starts with?");
-        int playerBalance = s.nextInt();
-        System.out.println("Number of players? (min & max 2)");
-        int numOfPlayers = s.nextInt();
+        do {
+            System.out.println("Each player starts with?");
+            while (!s.hasNextInt()) {
+                System.out.println("Invalid input!");
+                s.next();
+            }
+            playerBalance = s.nextInt();
+        } while (playerBalance < 0);
+        int numOfPlayers;
+        do {
+            System.out.println("Number of players? (min 2, max 8)");
+            while (!s.hasNextInt()) {
+                System.out.println("Invalid input!");
+                s.next();
+            }
+            numOfPlayers = s.nextInt();
+        } while (numOfPlayers < 2 || numOfPlayers > 8);
         for (int i = 0; i < numOfPlayers; i++) {
             if (i == 0) {
                 playerIDS.put(String.valueOf(i), "Player");

@@ -35,6 +35,7 @@ public class Logic {
     private boolean fullHouse;
     private boolean fourOfAKind;
     private boolean threeOfAKind;
+    private String flushSuit;
 
 
     public Logic(ArrayList<Card> cardsToCompare, Player player) {
@@ -254,6 +255,7 @@ public class Logic {
         for (String key : suitAndQty.keySet()) {
             if (suitAndQty.get(key) >= 5) {
                 isFlush = true;
+                flushSuit = key;
                 rankSetter(6);
                 for (int c = 0; c < suitAndQty.get(key); c++) {
                     highCardNumbers.add(suitAndCard.get(key).get(c));
@@ -283,7 +285,7 @@ public class Logic {
         findStraights(cardsIntArray, cardsSuitArray);
         findingPairs(cardsIntArray);
         findTopCards(cardsIntArray);
-        if (isFlush || isStraight) {
+        if (isFlush) {
             return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate};
         }
         else {
@@ -299,5 +301,9 @@ public class Logic {
 
     private String getCardHand(int value) {
         return cardString[value - 1];
+    }
+
+    String getFlushSuit() {
+        return flushSuit;
     }
 }
