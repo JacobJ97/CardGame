@@ -285,6 +285,9 @@ public class Logic {
         findStraights(cardsIntArray, cardsSuitArray);
         findingPairs(cardsIntArray);
         findTopCards(cardsIntArray);
+        if (handRank == 1) {
+            highCardNumbers = highCardNumbersSeperate;
+        }
         if (isFlush) {
             return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate};
         }

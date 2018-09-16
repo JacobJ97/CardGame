@@ -58,7 +58,7 @@ public class Game {
                 }
                 messagesInGame(turnNumber);
                 for (int playerTurn = 0; playerTurn < currentPlayers.size(); playerTurn++) {
-                    inputsInGame(currentPlayers.get(playerTurn), playerTurn, pot);
+                    inputsInGame(currentPlayers.get(playerTurn), playerTurn, pot, turnNumber);
                     int finalPlayerTurn = playerTurn;
                     currentPlayers.removeIf((Player player) -> !playerState.get(playerIDS.get(String.valueOf(String.valueOf(finalPlayerTurn)))));
                     if (currentPlayers.size() == 1) {
@@ -146,42 +146,50 @@ public class Game {
         }
     }
 
-    private static void inputsInGame(Player player, int index, Pot pot) {
-        System.out.println("The total amount in the pot is: $" + pot.getPotTotal());
-        Scanner s = new Scanner(System.in);
-        String move = s.next();
-        while (move.equals("cash")) {
-            int playerBalance = player.getPlayerBalance();
-            System.out.println("$" + playerBalance);
-            move = s.next();
-        }
-        while (!move.equals("call") && !move.equals("raise") && !move.equals("fold")) {
-            System.out.println("That is not a proper input. You can either check your balance, call, raise or fold.");
-            move = s.next();
-        }
-        switch (move) {
-            case "call": {
-                int call = pot.getCallTotal();
-                pot.setPotTotal(call);
-                player.setPlayerBalance(player.getPlayerBalance() - call);
-                System.out.println("You have called a total of $" + call);
-                break;
+    private static void inputsInGame(Player player, int index, Pot pot, int turnNumber) {
+        if (player.toString().equals("Player")) {
+            System.out.println("The total amount in the pot is: $" + pot.getPotTotal());
+            Scanner s = new Scanner(System.in);
+            String move = s.next();
+            while (move.equals("cash")) {
+                int playerBalance = player.getPlayerBalance();
+                System.out.println("$" + playerBalance);
+                move = s.next();
             }
-            case "raise": {
-                int call = pot.getCallTotal();
-                System.out.println("How much do you want to raise it by? Current bet is at $" + call);
-                int raiseAmount = s.nextInt();
-                pot.setPotTotal(call + raiseAmount);
-                player.setPlayerBalance(player.getPlayerBalance() - (call + raiseAmount));
-                break;
+            while (!move.equals("call") && !move.equals("raise") && !move.equals("fold")) {
+                System.out.println("That is not a proper input. You can either check your balance, call, raise or fold.");
+                move = s.next();
             }
-            case "fold":
-                player.fold();
-                playerState.put(playerIDS.get(String.valueOf(index)), false);
-                break;
-            default:
-                System.out.println("ponk");
-                break;
+            switch (move) {
+                case "call": {
+                    int call = pot.getCallTotal();
+                    pot.setPotTotal(call);
+                    player.setPlayerBalance(player.getPlayerBalance() - call);
+                    System.out.println("You have called a total of $" + call);
+                    break;
+                }
+                case "raise": {
+                    int call = pot.getCallTotal();
+                    System.out.println("How much do you want to raise it by? Current bet is at $" + call);
+                    int raiseAmount = s.nextInt();
+                    pot.setPotTotal(call + raiseAmount);
+                    player.setPlayerBalance(player.getPlayerBalance() - (call + raiseAmount));
+                    break;
+                }
+                case "fold":
+                    player.fold();
+                    playerState.put(playerIDS.get(String.valueOf(index)), false);
+                    break;
+                default:
+                    System.out.println("ponk");
+                    break;
+            }
+        }
+        else {
+            Logic logic = new Logic(player.getPlayerCards(), player);
+            Object[] handInformation = logic.determineHand();
+            ComputerBrain ai = new ComputerBrain(handInformation);
+            ai.determineMove(turnNumber);
         }
     }
 
