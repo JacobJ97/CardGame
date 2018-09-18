@@ -5,6 +5,11 @@ public class Player {
     private ArrayList<Card> playerCards;
     private int playerBalance;
     private String name;
+    private int totalBetted;
+    private int playerStanding;
+    private int rank;
+    private int secondaryRank;
+    private int thirdRank;
 
     Player(String name, int playerBalance) {
         this.name = name;
@@ -19,7 +24,7 @@ public class Player {
         }
     }
 
-    public ArrayList<Card> getPlayerCards() {
+    ArrayList<Card> getPlayerCards() {
         return playerCards;
     }
 
@@ -27,13 +32,35 @@ public class Player {
         this.playerCards.clear();
     }
 
-    public int getPlayerBalance() {
+    void setTotalBetted(int bet) {
+        totalBetted += bet;
+    }
+
+    int getTotalBetted() {
+        return totalBetted;
+    }
+
+    int getPlayerBalance() {
         return playerBalance;
     }
 
-    public void setPlayerBalance(int playerBalance) {
+    void setPlayerBalance(int playerBalance) {
         this.playerBalance = playerBalance;
     }
+
+    void setPlayerRank(int rank) {
+        this.rank = rank;
+    }
+
+    void setPlayerStanding(int playerStanding) {
+        this.playerStanding = playerStanding;
+    }
+
+    int getPlayerStanding() {
+        return playerStanding;
+    }
+
+
 
     public String toString() {
         return (name);

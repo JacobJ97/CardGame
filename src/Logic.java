@@ -36,6 +36,7 @@ public class Logic {
     private boolean fourOfAKind;
     private boolean threeOfAKind;
     private String flushSuit;
+    private boolean sameSuit;
 
 
     public Logic(ArrayList<Card> cardsToCompare, Player player) {
@@ -261,6 +262,9 @@ public class Logic {
                     highCardNumbers.add(suitAndCard.get(key).get(c));
                 }
             }
+            if (suitAndQty.get(key) == 2 && cardsInt.length == 2) {
+                sameSuit = true;
+            }
         }
     }
 
@@ -308,5 +312,9 @@ public class Logic {
 
     String getFlushSuit() {
         return flushSuit;
+    }
+
+    boolean isSameSuit() {
+        return sameSuit;
     }
 }

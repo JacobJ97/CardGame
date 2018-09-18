@@ -57,13 +57,31 @@ public class Game {
                     tableCards.setTableCards(cardsOnTable);
                 }
                 messagesInGame(turnNumber);
-                for (int playerTurn = 0; playerTurn < currentPlayers.size(); playerTurn++) {
-                    inputsInGame(currentPlayers.get(playerTurn), playerTurn, pot, turnNumber);
-                    int finalPlayerTurn = playerTurn;
-                    currentPlayers.removeIf((Player player) -> !playerState.get(playerIDS.get(String.valueOf(String.valueOf(finalPlayerTurn)))));
-                    if (currentPlayers.size() == 1) {
-                        System.out.println("You have won a total of $" + pot.getPotTotal());
-                        currentPlayers.get(0).setPlayerBalance(pot.getPotTotal());
+                boolean allCall = false;
+                while (!allCall) {
+                    for (int playerTurn = 0; playerTurn < currentPlayers.size(); playerTurn++) {
+                        inputsInGame(currentPlayers.get(playerTurn), playerTurn, pot, turnNumber);
+                        int finalPlayerTurn = playerTurn;
+                        currentPlayers.removeIf((Player player) -> !playerState.get(playerIDS.get(String.valueOf(String.valueOf(finalPlayerTurn)))));
+                        if (currentPlayers.size() == 1) {
+                            System.out.println("You have won a total of $" + pot.getPotTotal());
+                            currentPlayers.get(0).setPlayerBalance(pot.getPotTotal());
+                        }
+                        for (int d = 1; d < currentPlayers.size(); d++) {
+                            allCall = true;
+                            if (currentPlayers.get(d) != currentPlayers.get(0)) {
+                                if (currentPlayers.get(d).getPlayerBalance() == 0) {
+                                    continue;
+                                }
+                                else {
+                                    allCall = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (allCall) {
+                            break;
+                        }
                     }
                 }
             }
@@ -163,8 +181,15 @@ public class Game {
             switch (move) {
                 case "call": {
                     int call = pot.getCallTotal();
-                    pot.setPotTotal(call);
-                    player.setPlayerBalance(player.getPlayerBalance() - call);
+                    if (call > player.getPlayerBalance()) {
+                        call = player.getPlayerBalance();
+                        pot.setPotTotal(call);
+                        player.setPlayerBalance(0);
+                    } else {
+                        pot.setPotTotal(call);
+                        player.setPlayerBalance(player.getPlayerBalance() - call);
+                    }
+                    player.setTotalBetted(call);
                     System.out.println("You have called a total of $" + call);
                     break;
                 }
@@ -172,8 +197,16 @@ public class Game {
                     int call = pot.getCallTotal();
                     System.out.println("How much do you want to raise it by? Current bet is at $" + call);
                     int raiseAmount = s.nextInt();
-                    pot.setPotTotal(call + raiseAmount);
-                    player.setPlayerBalance(player.getPlayerBalance() - (call + raiseAmount));
+                    if (call + raiseAmount > player.getPlayerBalance()) {
+                        raiseAmount = player.getPlayerBalance();
+                        pot.setPotTotal(raiseAmount);
+                        player.setPlayerBalance(0);
+                    } else {
+                        pot.setPotTotal(call + raiseAmount);
+                        player.setPlayerBalance(player.getPlayerBalance() - (call + raiseAmount));
+                    }
+                    player.setTotalBetted(call + raiseAmount);
+                    System.out.println("You have raised it by $" + raiseAmount + " to bring the bet total to $" + call + raiseAmount);
                     break;
                 }
                 case "fold":
@@ -188,7 +221,7 @@ public class Game {
         else {
             Logic logic = new Logic(player.getPlayerCards(), player);
             Object[] handInformation = logic.determineHand();
-            ComputerBrain ai = new ComputerBrain(handInformation);
+            ComputerBrain ai = new ComputerBrain(handInformation, logic);
             ai.determineMove(turnNumber);
         }
     }
