@@ -1,8 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Arrays;
+import java.util.*;
 
 public class Game {
 
@@ -30,19 +26,45 @@ public class Game {
         displayMenu();
         inputsAtStart();
         int[] settings = initSettings();
-        playGame(settings);
+        Random r = new Random();
+        int randPosition = r.nextInt(settings[1]);
+        playGame(settings, randPosition);
         System.out.println("Done!");
     }
 
-    private static void playGame(int[] settings) {
-        Pot pot = new Pot(settings[0] / 100, settings[0] / 50);
+    private static void playGame(int[] settings, int randPosition) {
         Player[] players = new Player[settings[1]];
         boolean playing = true;
 
+        for (int i = 0; i < players.length; i++) {
+            players[i] = new Player(playerIDS.get(String.valueOf(i)), settings[0]);
+        }
+
         while (playing) {
+            int smallBlindIndex;
+            int bigBlindIndex;
+            Pot pot = new Pot(settings[0] / 100, settings[0] / 50);
             Deck cards = new Deck();
+            randPosition++;
+            if (randPosition == players.length - 1) {
+                smallBlindIndex = 0;
+            } else {
+                smallBlindIndex = randPosition;
+            }
+            //small blind
+            players[smallBlindIndex].setPlayerBalance(players[smallBlindIndex].getPlayerBalance() - pot.getSmallBlind());
+            if ((randPosition + 1) == players.length - 1) {
+                bigBlindIndex = 0;
+            } else {
+                bigBlindIndex = randPosition + 1;
+            }
+            //large blind
+            players[bigBlindIndex].setPlayerBalance(players[bigBlindIndex].getPlayerBalance() - pot.getBigBlind());
+            int x = bigBlindIndex + 1;
             for (int i = 0; i < players.length; i++) {
-                players[i] = new Player(playerIDS.get(String.valueOf(i)), settings[0]);
+                if (x == players.length - 1) {
+                    x = 0;
+                }
                 ArrayList<Card> dealtCards = cards.dealCards(INITIAL_DRAW_TO_PLAYERS);
                 players[i].setPlayerCards(dealtCards);
                 playerState.put(playerIDS.get(String.valueOf(i)), true);
@@ -99,7 +121,7 @@ public class Game {
                 allPlayerInfo.put(players[playerHand], handInformation);
             }
             Head2Head head2head = new Head2Head(allPlayerInfo);
-            Object[] winnersInfo = head2head.determineWinner();
+            Object[] winnersInfo = head2head.determineWinner(pot);
             @SuppressWarnings("unchecked")
             ArrayList<Player> winners = (ArrayList<Player>) winnersInfo[0];
             int rank = (int)winnersInfo[1];

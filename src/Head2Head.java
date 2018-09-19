@@ -20,7 +20,7 @@ public class Head2Head {
         this.allPlayerInfo = allPlayerInfo;
     }
 
-    Object[] determineWinner() {
+    Object[] determineWinner(Pot pot) {
         for (Player player : allPlayerInfo.keySet()) {
             Object[] handInfo = allPlayerInfo.get(player);
             @SuppressWarnings("unchecked")
@@ -30,7 +30,7 @@ public class Head2Head {
             int rank = (int)handInfo[0];
             handRankSetter(player, rank, hand, top5);
         }
-        determineStandings();
+        determineStandings(pot);
         return new Object[] {playersWon, topHand, winningHighCard, winningHandNums};
     }
 
@@ -113,7 +113,7 @@ public class Head2Head {
         }
     }
 
-    private void determineStandings() {
+    private void determineStandings(Pot pot) {
         Map<Player, Integer> sortedHandRank = handRankComp.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
         Map<Player, Integer> secondarySortedRank = secondaryRankComp.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
         Map<Player, Integer> teritarySortedRank = teritaryRankComp.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -160,6 +160,82 @@ public class Head2Head {
                 mapRankings.put(d, playerList);
                 mapRankings.get(d).add(players.get(d));
             }
+        }
+
+        for (Integer standing : mapRankings.keySet()) {
+            List<Player> player = mapRankings.get(standing);
+            for (int d = 0; d < player.size(); d++) {
+                player.get(d).setPlayerStanding(standing);
+            }
+        }
+
+        int totalPot = pot.getPotTotal();
+        if (mapRankings.get(0).size() == 1) {
+            Player player = mapRankings.get(0).get(0);
+            if (player.getPlayerBalance() > 0) {
+                player.setPlayerBalance(player.getPlayerBalance() + pot.getPotTotal());
+            }
+            else {
+                int callTotes = 0;
+                for (Integer standing : mapRankings.keySet()) {
+                    List<Player> individualPlayer = mapRankings.get(standing);
+                    for (int e = 0; e < individualPlayer.size(); e++) {
+                        Player playerLoop = individualPlayer.get(e);
+                        if (playerLoop.getTotalBetted() > player.getTotalBetted()) {
+                            int variance = playerLoop.getTotalBetted() - player.getTotalBetted();
+                            callTotes += player.getTotalBetted();
+                            playerLoop.setTotalBetted(-playerLoop.getTotalBetted());
+                            playerLoop.setTotalBetted(variance);
+                        }
+                        else {
+                            callTotes += playerLoop.getTotalBetted();
+                            playerLoop.setTotalBetted(-playerLoop.getTotalBetted());
+                            mapRankings.remove(standing, individualPlayer.get(e));
+                        }
+                    }
+                }
+                player.setPlayerStanding(player.getPlayerBalance() + callTotes);
+                pot.setPotTotal(pot.getPotTotal() - callTotes);
+
+                for (int v = 1; v < mapRankings.size(); v++) {
+                    List<Player> s = mapRankings.get(v);
+                    callTotes = 0;
+                    for (Player playerIndex : s) {
+                        callTotes += playerIndex.getTotalBetted();
+                    }
+                    for (Player playerIndex : s) {
+                        int a = playerIndex.getTotalBetted();
+                        float b = a / callTotes;
+                        float c = b * pot.getPotTotal();
+                        int totalShared = Math.round(c);
+                        playerIndex.setPlayerBalance(playerIndex.getPlayerBalance() + totalShared);
+                        playerIndex.setTotalBetted(-playerIndex.getTotalBetted());
+                    }
+                }
+            }
+        }
+        else {
+            for (int v = 0; v < mapRankings.size(); v++) {
+                List<Player> s = mapRankings.get(v);
+                int callTotes = 0;
+                int totalGone = 0;
+                for (Player playerIndex : s) {
+                    callTotes += playerIndex.getTotalBetted();
+                }
+                for (Player playerIndex : s) {
+                    int a = playerIndex.getTotalBetted();
+                    float b = a / callTotes;
+                    float c = b * pot.getPotTotal();
+                    int totalShared = Math.round(c);
+                    playerIndex.setPlayerBalance(playerIndex.getPlayerBalance() + totalShared);
+                    playerIndex.setTotalBetted(-playerIndex.getTotalBetted());
+                    totalGone += totalShared;
+                }
+                if (pot.getPotTotal() - totalGone <= 0) {
+                    break;
+                }
+            }
+
         }
     }
 
