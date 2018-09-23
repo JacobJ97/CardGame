@@ -31,7 +31,7 @@ public class Head2Head {
             handRankSetter(player, rank, hand, top5);
         }
         determineStandings(pot);
-        return new Object[] {playersWon, topHand, winningHighCard, winningHandNums};
+        return new Object[] {playersWon, topHand};
     }
 
     private void handRankSetter(Player player, int handRank, ArrayList<Integer> handCards, ArrayList<Integer> top5cards) {
@@ -91,7 +91,7 @@ public class Head2Head {
                                 teritaryRankComp.put(winningPlayer, b);
                             }
                             mapSetter(player, handRank, handCards, top5cards, true);
-                            winningHighCard = a;
+                            player.setPlayerHighestUniqueCard(a);
                             break;
                         } else if (b > a) {
                             if (teritaryRankComp.get(player) < a) {
@@ -174,32 +174,33 @@ public class Head2Head {
             Player player = mapRankings.get(0).get(0);
             if (player.getPlayerBalance() > 0) {
                 player.setPlayerBalance(player.getPlayerBalance() + pot.getPotTotal());
+                player.setTotalWon(pot.getPotTotal());
+                pot.setPotTotal(-pot.getPotTotal());
             }
             else {
                 int callTotes = 0;
                 for (Integer standing : mapRankings.keySet()) {
                     List<Player> individualPlayer = mapRankings.get(standing);
-                    for (int e = 0; e < individualPlayer.size(); e++) {
-                        Player playerLoop = individualPlayer.get(e);
+                    for (Player playerLoop : individualPlayer) {
                         if (playerLoop.getTotalBetted() > player.getTotalBetted()) {
                             int variance = playerLoop.getTotalBetted() - player.getTotalBetted();
                             callTotes += player.getTotalBetted();
-                            playerLoop.setTotalBetted(-playerLoop.getTotalBetted());
-                            playerLoop.setTotalBetted(variance);
-                        }
-                        else {
+                            playerLoop.setTotalBetted(-playerLoop.getTotalBetted() + variance);
+                        } else {
                             callTotes += playerLoop.getTotalBetted();
                             playerLoop.setTotalBetted(-playerLoop.getTotalBetted());
-                            mapRankings.remove(standing, individualPlayer.get(e));
+                            mapRankings.remove(standing, playerLoop);
                         }
                     }
                 }
-                player.setPlayerStanding(player.getPlayerBalance() + callTotes);
-                pot.setPotTotal(pot.getPotTotal() - callTotes);
+                player.setPlayerBalance(player.getPlayerBalance() + callTotes);
+                player.setTotalWon(pot.getPotTotal() - callTotes);
+                pot.setPotTotal(-player.getTotalWon());
 
                 for (int v = 1; v < mapRankings.size(); v++) {
                     List<Player> s = mapRankings.get(v);
                     callTotes = 0;
+                    int totalGone = 0;
                     for (Player playerIndex : s) {
                         callTotes += playerIndex.getTotalBetted();
                     }
@@ -208,8 +209,13 @@ public class Head2Head {
                         float b = a / callTotes;
                         float c = b * pot.getPotTotal();
                         int totalShared = Math.round(c);
-                        playerIndex.setPlayerBalance(playerIndex.getPlayerBalance() + totalShared);
-                        playerIndex.setTotalBetted(-playerIndex.getTotalBetted());
+                        playerIndex.setTotalWon(totalShared);
+                        playerIndex.setPlayerBalance(playerIndex.getPlayerBalance() + playerIndex.getTotalWon());
+                        totalGone += totalShared;
+                    }
+                    pot.setPotTotal(-totalGone);
+                    if (pot.getPotTotal() - totalGone <= 0) {
+                        break;
                     }
                 }
             }
@@ -227,11 +233,12 @@ public class Head2Head {
                     float b = a / callTotes;
                     float c = b * pot.getPotTotal();
                     int totalShared = Math.round(c);
-                    playerIndex.setPlayerBalance(playerIndex.getPlayerBalance() + totalShared);
-                    playerIndex.setTotalBetted(-playerIndex.getTotalBetted());
+                    playerIndex.setTotalWon(totalShared);
+                    playerIndex.setPlayerBalance(playerIndex.getPlayerBalance() + playerIndex.getTotalWon());
                     totalGone += totalShared;
                 }
-                if (pot.getPotTotal() - totalGone <= 0) {
+                pot.setPotTotal(-totalGone);
+                if (pot.getPotTotal() <= 0) {
                     break;
                 }
             }
@@ -265,5 +272,6 @@ public class Head2Head {
             winningHandNums.add(handCards.get(0));
             winningHandNums.add(handCards.get(handCards.size() - 1));
         }
+        player.setPlayerHighlightCards(winningHandNums);
     }
 }

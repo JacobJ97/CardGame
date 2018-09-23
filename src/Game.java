@@ -8,6 +8,7 @@ public class Game {
 
     private static String[] cardRanksString = {"High Card", "Pair", "Two Pair", "Three of a Kind", "Straight", "Flush",
     "Full House", "Four of a Kind", "Straight Flush", "Royal Flush"};
+    private static Map<Player, String> playerBetSet = new HashMap<>();
 
     private static String[] ranksInt = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
 
@@ -80,6 +81,7 @@ public class Game {
                 }
                 messagesInGame(turnNumber);
                 boolean allCall = false;
+                playerBetSet = null;
                 while (!allCall) {
                     for (int playerTurn = 0; playerTurn < currentPlayers.size(); playerTurn++) {
                         inputsInGame(currentPlayers.get(playerTurn), playerTurn, pot, turnNumber);
@@ -124,35 +126,20 @@ public class Game {
             Object[] winnersInfo = head2head.determineWinner(pot);
             @SuppressWarnings("unchecked")
             ArrayList<Player> winners = (ArrayList<Player>) winnersInfo[0];
-            int rank = (int)winnersInfo[1];
-            System.out.println(rank);
-            @SuppressWarnings("unchecked")
-            ArrayList<Integer> fff = (ArrayList<Integer>) winnersInfo[3];
             if (winners.size() == 1) {
-                winners.get(0).setPlayerBalance(pot.getPotTotal());
-                System.out.print("Congrats " + winners.get(0) + ", you have won a total of $" + pot.getPotTotal() + " with a " + cardRanksString[rank - 1]);
-                if (rank == 2 || rank == 4 || rank == 8) {
-                    System.out.print(" of " + ranksInt[(fff.get(0) - 1)]);
-                }
-                else if (rank == 3 || rank == 7) {
-                    System.out.print(" of " + ranksInt[(fff.get(0) - 1)] + "& " + ranksInt[(fff.get(1) - 1)]);
-                }
-                else if (rank == 5 || rank == 9 || rank == 10) {
-                    System.out.print(" that is between " + ranksInt[(fff.get(0) - 1)] + "& " + ranksInt[(fff.get(1) - 1)]);
-                }
-                else {
-                    System.out.print(" of " + suitFlush);
-                }
+                Player winner = winners.get(0);
+                System.out.print("Congrats " + winner + ", you have won a total of $" + winner.getTotalWon() + " with a " + cardRanksString[winner.getPlayerHandRank() - 1]);
+                getWinningMessage(winner.getPlayerHandRank(), winner.getPlayerHighlightCards());
             } else {
-                System.out.print("Congrats to ");
+                System.out.print("Congrats to: ");
                 for (int j = 0; j < winners.size(); j++) {
-                    winners.get(j).setPlayerBalance(pot.getPotTotal() / winners.size());
-                    System.out.print(winners.get(j));
+                    Player winner = winners.get(j);
+                    System.out.print(winner + "for winning a total of $" + winner.getTotalWon() + "with a " + cardRanksString[winner.getPlayerHandRank() - 1]);
+                    getWinningMessage(winner.getPlayerHandRank(), winner.getPlayerHighlightCards());
                     if (winners.size() - j != 0) {
                         System.out.print("& ");
                     }
                 }
-                System.out.print(", you have won a total of $" + pot.getPotTotal() / winners.size());
             }
             System.out.println("");
             System.out.println("Do you want to play again? Y or N");
@@ -163,11 +150,35 @@ public class Game {
                 playAgain = s.next();
             }
             if (playAgain.equals("Y")) {
+                for (int d = 0; d < players.length; d++) {
+                    players[d].setTotalWon(0);
+                    players[d].setPlayerHighlightCards(null);
+                    players[d].setPlayerHighestUniqueCard(0);
+                    players[d].setTotalBetted(-players[d].getTotalBetted());
+                    players[d].setPlayerStanding(0);
+                    players[d].setPlayerCards(null);
+                    players[d].setPlayerRank(0);
+                }
                 System.out.println("Another game it is, have fun!");
             } else {
                 System.out.println("You have ended the game with a total of $" + players[0].getPlayerBalance());
                 playing = false;
             }
+        }
+    }
+
+    private static void getWinningMessage(int rank, ArrayList<Integer> winningCards) {
+        if (rank == 2 || rank == 4 || rank == 8) {
+            System.out.print(" of " + ranksInt[(winningCards.get(0) - 1)]);
+        }
+        else if (rank == 3 || rank == 7) {
+            System.out.print(" of " + ranksInt[(winningCards.get(0) - 1)] + "& " + ranksInt[(winningCards.get(1) - 1)]);
+        }
+        else if (rank == 5 || rank == 9 || rank == 10) {
+            System.out.print(" that is between " + ranksInt[(winningCards.get(0) - 1)] + "& " + ranksInt[(winningCards.get(1) - 1)]);
+        }
+        else {
+            System.out.print(" of " + suitFlush);
         }
     }
 
@@ -200,6 +211,7 @@ public class Game {
                 System.out.println("That is not a proper input. You can either check your balance, call, raise or fold.");
                 move = s.next();
             }
+            playerBetSet.put(player, move);
             switch (move) {
                 case "call": {
                     int call = pot.getCallTotal();
@@ -244,7 +256,7 @@ public class Game {
             Logic logic = new Logic(player.getPlayerCards(), player);
             Object[] handInformation = logic.determineHand();
             ComputerBrain ai = new ComputerBrain(handInformation, logic);
-            ai.determineMove(turnNumber);
+            ai.determineMove(turnNumber, playerBetSet);
         }
     }
 

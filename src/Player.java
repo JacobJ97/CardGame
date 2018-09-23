@@ -7,9 +7,10 @@ public class Player {
     private String name;
     private int totalBetted;
     private int playerStanding;
+    private ArrayList<Integer> goodCardsInt;
+    private int totalWon;
+    private int highestUniqueCard;
     private int rank;
-    private int secondaryRank;
-    private int thirdRank;
 
     Player(String name, int playerBalance) {
         this.name = name;
@@ -55,6 +56,31 @@ public class Player {
     void setPlayerStanding(int playerStanding) {
         this.playerStanding = playerStanding;
     }
+
+    void setPlayerHighlightCards(ArrayList<Integer> goodCardsInt) {
+        this.goodCardsInt = goodCardsInt;
+    }
+
+    ArrayList<Integer> getPlayerHighlightCards() {
+        return goodCardsInt;
+    }
+
+    void setPlayerHighestUniqueCard(int highestUniqueCard) {
+        this.highestUniqueCard = highestUniqueCard;
+    }
+
+    void setTotalWon(int totalWon) {
+        this.totalWon = totalWon;
+    }
+
+    int getTotalWon() {
+        return totalWon;
+    }
+
+    int getPlayerHandRank() {
+        return rank;
+    }
+
 
     int getPlayerStanding() {
         return playerStanding;
