@@ -7,6 +7,7 @@ public class ComputerBrain {
     private Object[] handInformation;
     private Logic logic;
     private String move;
+    private int raiseValue;
 
     ComputerBrain(Object[] handInformation, Logic logic) {
         this.handInformation = handInformation;
@@ -20,6 +21,14 @@ public class ComputerBrain {
         @SuppressWarnings("unchecked")
         ArrayList<Integer> topCards = (ArrayList<Integer>)handInformation[2];
         getRankStrength(rank, turnNumber, hands, topCards, playerMoves);
+    }
+
+    int getRaiseValue() {
+        return raiseValue;
+    }
+
+    String getMove() {
+        return move;
     }
 
     private void getRankStrength(int handRank, int handTurn, ArrayList<Integer> hands, ArrayList<Integer> topCards, Map<Player, String> playerMoves) {
@@ -130,19 +139,19 @@ public class ComputerBrain {
             }
         }
         else if (handTurn == 1) {
-            if (handRank > 9) {
+            if (handRank >= 9) {
                 randomMoveDecider(a + 5, b + 55, c + 40, 0);
             }
 
-            if (handRank > 8) {
+            if (handRank >= 8) {
                 randomMoveDecider(a + 3, b + 40, c + 57, 0);
             }
 
-            if (handRank > 5) {
+            if (handRank >= 5) {
                 randomMoveDecider(a + 1, b + 35, c + 64, d + 1);
             }
 
-            if (handRank > 2) {
+            if (handRank >= 2) {
                 randomMoveDecider(a + 1, b + 20, c + 69, d + 10);
             }
 
@@ -151,19 +160,19 @@ public class ComputerBrain {
             }
         }
         else if (handTurn == 2) {
-            if (handRank > 9) {
+            if (handRank >= 9) {
                 randomMoveDecider(a + 10, b + 60, c + 30, 0);
             }
 
-            if (handRank > 8) {
+            if (handRank >= 8) {
                 randomMoveDecider(a + 5, b + 55, c + 40, 0);
             }
 
-            if (handRank > 5) {
+            if (handRank >= 5) {
                 randomMoveDecider(a + 5, b + 25, c + 69, d + 1);
             }
 
-            if (handRank > 2) {
+            if (handRank >= 2) {
                 randomMoveDecider(a + 1, b + 9, c + 60, d + 30);
             }
 
@@ -172,19 +181,19 @@ public class ComputerBrain {
             }
         }
         else if (handTurn == 3) {
-            if (handRank > 9) {
+            if (handRank >= 9) {
                 randomMoveDecider(a + 20, b + 50, c + 30, 0);
             }
 
-            if (handRank > 8) {
+            if (handRank >= 8) {
                 randomMoveDecider(a + 10, b + 50, c + 40, 0);
             }
 
-            if (handRank > 5) {
+            if (handRank >= 5) {
                 randomMoveDecider(a + 5, b + 40, c + 50, d + 5);
             }
 
-            if (handRank > 2) {
+            if (handRank >= 2) {
                 randomMoveDecider(a + 1, b + 20, c + 65, d + 10);
             }
 
@@ -200,7 +209,8 @@ public class ComputerBrain {
 
     private void randomMoveDecider(int allIn, int raise, int call, int fold) {
         Random r = new Random();
-        int s = r.nextInt(100) + 1;
+        int s = r.nextInt(allIn + raise + call + fold) + 1;
+
         /*
         allin - 5, raise 30, call 50, fold
         all in: 1 - 5
@@ -214,15 +224,15 @@ public class ComputerBrain {
             move = "allIn";
         }
         //if 5+30 (35) is equal to or greater than 46
-        if (s <= (raise + allIn)) {
+        else if (s <= (raise + allIn)) {
             move = "raise";
         }
         //if 5+30+50 (85) is equal to or greater than 46
         //call will be called (lol)
-        if (s <= (call + allIn + raise)) {
+        else if (s <= (call + allIn + raise)) {
             move = "call";
         }
-        if (s <= (fold + allIn + raise + call)) {
+        else if (s <= (fold + allIn + raise + call)) {
             move = "fold";
         }
         else {
@@ -230,19 +240,19 @@ public class ComputerBrain {
         }
     }
 
-    private int determineRaiseValue(int rank) {
+    private void determineRaiseValue(int rank) {
         Random r = new Random();
         if (rank > 9) {
-            return r.nextInt(400) + 1;
+            raiseValue = r.nextInt(400) + 1;
         }
         else if (rank > 5) {
-            return r.nextInt(250) + 1;
+            raiseValue = r.nextInt(250) + 1;
         }
         else if (rank > 2) {
-            return r.nextInt(200) + 1;
+            raiseValue = r.nextInt(200) + 1;
         }
         else {
-            return r.nextInt(150) + 1;
+            raiseValue = r.nextInt(150) + 1;
         }
     }
 }
