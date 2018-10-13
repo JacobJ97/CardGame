@@ -11,6 +11,7 @@ public class Player {
     private int totalWon;
     private int highestUniqueCard;
     private int rank;
+    private int roundBet;
 
     Player(String name, int playerBalance) {
         this.name = name;
@@ -23,6 +24,10 @@ public class Player {
         for (Card playerCard : playerCards) {
             System.out.println(playerCard);
         }
+    }
+
+    void removePlayerCards() {
+        playerCards.clear();
     }
 
     ArrayList<Card> getPlayerCards() {
@@ -41,12 +46,28 @@ public class Player {
         return totalBetted;
     }
 
+    void setRoundBet(int bet) {
+        roundBet += bet;
+    }
+
+    int getRoundBet() {
+        return roundBet;
+    }
+
+    void clearRoundBet() {
+        roundBet = 0;
+    }
+
     int getPlayerBalance() {
         return playerBalance;
     }
 
     void setPlayerBalance(int playerBalance) {
         this.playerBalance = playerBalance;
+    }
+
+    void addWinnings(int winnings) {
+        this.playerBalance += winnings;
     }
 
     void setPlayerRank(int rank) {
@@ -80,13 +101,6 @@ public class Player {
     int getPlayerHandRank() {
         return rank;
     }
-
-
-    int getPlayerStanding() {
-        return playerStanding;
-    }
-
-
 
     public String toString() {
         return (name);
