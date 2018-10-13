@@ -5,12 +5,12 @@ public class Game {
     /** IDS that will have information of cards to hold */
     private static Map<String, String> playerIDS = new HashMap<>();
     private static Map<String, Boolean> playerState = new HashMap<>();
+    private static Map<Player, String> playerBetSet = new HashMap<>();
 
     private static String[] cardRanksString = {"High Card", "Pair", "Two Pair", "Three of a Kind", "Straight", "Flush",
     "Full House", "Four of a Kind", "Straight Flush", "Royal Flush"};
-    private static Map<Player, String> playerBetSet = new HashMap<>();
-
     private static String[] ranksInt = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
+    private static int startingCallBet;
 
     /** Card move info */
     private static final int INITIAL_DRAW_TO_PLAYERS = 2;
@@ -45,25 +45,32 @@ public class Game {
             int smallBlindIndex;
             int bigBlindIndex;
             Pot pot = new Pot(settings[0] / 100, settings[0] / 50);
+            startingCallBet = pot.getBigBlind();
             Deck cards = new Deck();
+            System.out.println(randPosition);
             randPosition++;
-            if (randPosition == players.length - 1) {
+            if (randPosition >= players.length) {
+                randPosition = 0;
                 smallBlindIndex = 0;
             } else {
                 smallBlindIndex = randPosition;
             }
+            System.out.println(smallBlindIndex);
             //small blind
             players[smallBlindIndex].setPlayerBalance(players[smallBlindIndex].getPlayerBalance() - pot.getSmallBlind());
-            if ((randPosition + 1) == players.length - 1) {
+            System.out.println(players[smallBlindIndex].toString() + " has gotten the small blind, putting a total of $" + pot.getSmallBlind() + " in.");
+            if ((randPosition + 1) >= players.length) {
                 bigBlindIndex = 0;
             } else {
                 bigBlindIndex = randPosition + 1;
             }
+            System.out.println(bigBlindIndex);
             //large blind
             players[bigBlindIndex].setPlayerBalance(players[bigBlindIndex].getPlayerBalance() - pot.getBigBlind());
+            System.out.println(players[bigBlindIndex].toString() + " has gotten the big blind, putting a total of $" + pot.getBigBlind() + " in.");
             int x = bigBlindIndex + 1;
             for (int i = 0; i < players.length; i++) {
-                if (x == players.length - 1) {
+                if (x == players.length) {
                     x = 0;
                 }
                 ArrayList<Card> dealtCards = cards.dealCards(INITIAL_DRAW_TO_PLAYERS);
@@ -78,66 +85,74 @@ public class Game {
                 if (turnNumber >= 1) {
                     ArrayList<Card> cardsOnTable = cards.dealCards(turnInfo[turnNumber]);
                     tableCards.setTableCards(cardsOnTable);
+                    pot.setCallTotalOverride(startingCallBet);
                 }
                 messagesInGame(turnNumber);
                 boolean allCall = false;
-                playerBetSet = null;
+                playerBetSet.clear();
+                for (int f = 0; f < currentPlayers.size(); f++) {
+                    currentPlayers.get(f).clearRoundBet();
+                }
                 while (!allCall) {
                     for (int playerTurn = 0; playerTurn < currentPlayers.size(); playerTurn++) {
                         inputsInGame(currentPlayers.get(playerTurn), playerTurn, pot, turnNumber);
-                        int finalPlayerTurn = playerTurn;
-                        currentPlayers.removeIf((Player player) -> !playerState.get(playerIDS.get(String.valueOf(String.valueOf(finalPlayerTurn)))));
-                        if (currentPlayers.size() == 1) {
-                            System.out.println("You have won a total of $" + pot.getPotTotal());
-                            currentPlayers.get(0).setPlayerBalance(pot.getPotTotal());
+                        if (playerBetSet.get(currentPlayers.get(playerTurn)).equals("fold")) {
+                            currentPlayers.remove(currentPlayers.get(playerTurn));
                         }
-                        for (int d = 1; d < currentPlayers.size(); d++) {
+                        if (currentPlayers.size() == 1) {
+                            System.out.println(currentPlayers.get(0) + " has won a total of $" + pot.getPotTotal());
+                            currentPlayers.get(0).addWinnings(pot.getPotTotal());
                             allCall = true;
-                            if (currentPlayers.get(d) != currentPlayers.get(0)) {
-                                if (currentPlayers.get(d).getPlayerBalance() == 0) {
-                                    continue;
-                                }
+
+                        }
+                        for (int d = 0; d < currentPlayers.size() - 1; d++) {
+                            allCall = true;
+                            if (currentPlayers.get(d).getTotalBetted() != currentPlayers.get(d+1).getTotalBetted()) {
+                                if (currentPlayers.get(d).getPlayerBalance() == 0) {continue;}
+                                else if (currentPlayers.get(d+1).getPlayerBalance() == 0) {continue;}
                                 else {
                                     allCall = false;
                                     break;
                                 }
                             }
                         }
-                        if (allCall) {
-                            break;
-                        }
                     }
                 }
-            }
-            //calculating the winner
-            Map<Player, Object[]> allPlayerInfo = new HashMap<>();
-            for (int playerHand = 0; playerHand < currentPlayers.size(); playerHand++) {
-                ArrayList<Card> allCards = new ArrayList<>();
-                allCards.addAll(players[playerHand].getPlayerCards());
-                allCards.addAll(tableCards.getTableCards());
-                Logic logic = new Logic(allCards, players[playerHand]);
-                Object[] handInformation = logic.determineHand();
-                if (logic.getFlushSuit() != null) {
-                    suitFlush = logic.getFlushSuit();
+                if (currentPlayers.size() == 1) {
+                    break;
                 }
-                allPlayerInfo.put(players[playerHand], handInformation);
             }
-            Head2Head head2head = new Head2Head(allPlayerInfo);
-            Object[] winnersInfo = head2head.determineWinner(pot);
-            @SuppressWarnings("unchecked")
-            ArrayList<Player> winners = (ArrayList<Player>) winnersInfo[0];
-            if (winners.size() == 1) {
-                Player winner = winners.get(0);
-                System.out.print("Congrats " + winner + ", you have won a total of $" + winner.getTotalWon() + " with a " + cardRanksString[winner.getPlayerHandRank() - 1]);
-                getWinningMessage(winner.getPlayerHandRank(), winner.getPlayerHighlightCards());
-            } else {
-                System.out.print("Congrats to: ");
-                for (int j = 0; j < winners.size(); j++) {
-                    Player winner = winners.get(j);
-                    System.out.print(winner + "for winning a total of $" + winner.getTotalWon() + "with a " + cardRanksString[winner.getPlayerHandRank() - 1]);
+            if (currentPlayers.size() > 1) {
+                //calculating the winner
+                Map<Player, Object[]> allPlayerInfo = new HashMap<>();
+                for (int playerHand = 0; playerHand < currentPlayers.size(); playerHand++) {
+                    ArrayList<Card> allCards = new ArrayList<>();
+                    allCards.addAll(players[playerHand].getPlayerCards());
+                    allCards.addAll(tableCards.getTableCards());
+                    Logic logic = new Logic(allCards, players[playerHand]);
+                    Object[] handInformation = logic.determineHand();
+                    if (logic.getFlushSuit() != null) {
+                        suitFlush = logic.getFlushSuit();
+                    }
+                    allPlayerInfo.put(players[playerHand], handInformation);
+                }
+                Head2Head head2head = new Head2Head(allPlayerInfo);
+                Object[] winnersInfo = head2head.determineWinner(pot);
+                @SuppressWarnings("unchecked")
+                ArrayList<Player> winners = (ArrayList<Player>) winnersInfo[0];
+                if (winners.size() == 1) {
+                    Player winner = winners.get(0);
+                    System.out.print("Congrats " + winner + ", you have won a total of $" + winner.getTotalWon() + " with a " + cardRanksString[winner.getPlayerHandRank() - 1]);
                     getWinningMessage(winner.getPlayerHandRank(), winner.getPlayerHighlightCards());
-                    if (winners.size() - j != 0) {
-                        System.out.print("& ");
+                } else {
+                    System.out.print("Congrats to: ");
+                    for (int j = 0; j < winners.size(); j++) {
+                        Player winner = winners.get(j);
+                        System.out.print(winner + "for winning a total of $" + winner.getTotalWon() + "with a " + cardRanksString[winner.getPlayerHandRank() - 1]);
+                        getWinningMessage(winner.getPlayerHandRank(), winner.getPlayerHighlightCards());
+                        if (winners.size() - j != 0) {
+                            System.out.print("& ");
+                        }
                     }
                 }
             }
@@ -150,14 +165,14 @@ public class Game {
                 playAgain = s.next();
             }
             if (playAgain.equals("Y")) {
-                for (int d = 0; d < players.length; d++) {
-                    players[d].setTotalWon(0);
-                    players[d].setPlayerHighlightCards(null);
-                    players[d].setPlayerHighestUniqueCard(0);
-                    players[d].setTotalBetted(-players[d].getTotalBetted());
-                    players[d].setPlayerStanding(0);
-                    players[d].setPlayerCards(null);
-                    players[d].setPlayerRank(0);
+                for (Player player : players) {
+                    player.setTotalWon(0);
+                    player.setPlayerHighlightCards(null);
+                    player.setPlayerHighestUniqueCard(0);
+                    player.setTotalBetted(-player.getTotalBetted());
+                    player.setPlayerStanding(0);
+                    player.removePlayerCards();
+                    player.setPlayerRank(0);
                 }
                 System.out.println("Another game it is, have fun!");
             } else {
@@ -198,58 +213,20 @@ public class Game {
     }
 
     private static void inputsInGame(Player player, int index, Pot pot, int turnNumber) {
+        String move;
+        Scanner s = new Scanner(System.in);
+        int raiseAmount = 0;
         if (player.toString().equals("Player")) {
             System.out.println("The total amount in the pot is: $" + pot.getPotTotal());
-            Scanner s = new Scanner(System.in);
-            String move = s.next();
+            move = s.next().toLowerCase();
             while (move.equals("cash")) {
                 int playerBalance = player.getPlayerBalance();
                 System.out.println("$" + playerBalance);
-                move = s.next();
+                move = s.next().toLowerCase();
             }
             while (!move.equals("call") && !move.equals("raise") && !move.equals("fold")) {
                 System.out.println("That is not a proper input. You can either check your balance, call, raise or fold.");
-                move = s.next();
-            }
-            playerBetSet.put(player, move);
-            switch (move) {
-                case "call": {
-                    int call = pot.getCallTotal();
-                    if (call > player.getPlayerBalance()) {
-                        call = player.getPlayerBalance();
-                        pot.setPotTotal(call);
-                        player.setPlayerBalance(0);
-                    } else {
-                        pot.setPotTotal(call);
-                        player.setPlayerBalance(player.getPlayerBalance() - call);
-                    }
-                    player.setTotalBetted(call);
-                    System.out.println("You have called a total of $" + call);
-                    break;
-                }
-                case "raise": {
-                    int call = pot.getCallTotal();
-                    System.out.println("How much do you want to raise it by? Current bet is at $" + call);
-                    int raiseAmount = s.nextInt();
-                    if (call + raiseAmount > player.getPlayerBalance()) {
-                        raiseAmount = player.getPlayerBalance();
-                        pot.setPotTotal(raiseAmount);
-                        player.setPlayerBalance(0);
-                    } else {
-                        pot.setPotTotal(call + raiseAmount);
-                        player.setPlayerBalance(player.getPlayerBalance() - (call + raiseAmount));
-                    }
-                    player.setTotalBetted(call + raiseAmount);
-                    System.out.println("You have raised it by $" + raiseAmount + " to bring the bet total to $" + call + raiseAmount);
-                    break;
-                }
-                case "fold":
-                    player.fold();
-                    playerState.put(playerIDS.get(String.valueOf(index)), false);
-                    break;
-                default:
-                    System.out.println("ponk");
-                    break;
+                move = s.next().toLowerCase();
             }
         }
         else {
@@ -257,6 +234,55 @@ public class Game {
             Object[] handInformation = logic.determineHand();
             ComputerBrain ai = new ComputerBrain(handInformation, logic);
             ai.determineMove(turnNumber, playerBetSet);
+            move = ai.getMove();
+            System.out.println(move);
+            if (move.equals("raise")) {
+                raiseAmount = ai.getRaiseValue();
+            }
+        }
+        playerBetSet.put(player, move);
+        switch (move) {
+            case "call": {
+                int call = pot.getCallTotal();
+                if (call > player.getPlayerBalance()) {
+                    call = player.getPlayerBalance();
+                    pot.setPotTotal(call);
+                    player.setPlayerBalance(0);
+                } else {
+                    pot.setPotTotal(call);
+                    player.setPlayerBalance(player.getPlayerBalance() - call);
+                }
+                player.setTotalBetted(call);
+                System.out.println(player + " has called a total of $" + call);
+                break;
+            }
+            case "raise": {
+                int call = pot.getCallTotal();
+                if (player.toString().equals("Player")) {
+                    System.out.println("How much do you want to raise it by? Current bet is at $" + call);
+                    raiseAmount = s.nextInt();
+                }
+                if (call + raiseAmount > player.getPlayerBalance()) {
+                    raiseAmount = player.getPlayerBalance();
+                    pot.setPotTotal(raiseAmount);
+                    player.setRoundBet(raiseAmount);
+                    player.setPlayerBalance(0);
+                } else {
+                    pot.setPotTotal(call + raiseAmount);
+                    player.setRoundBet(raiseAmount);
+                    player.setPlayerBalance(player.getPlayerBalance() - (call + raiseAmount));
+                }
+                player.setTotalBetted(call + raiseAmount);
+                System.out.println(player + " has raised it by $" + raiseAmount + " to bring the bet total to $" + (call + raiseAmount));
+                break;
+            }
+            case "fold":
+                player.fold();
+                playerState.put(playerIDS.get(String.valueOf(index)), false);
+                break;
+            default:
+                System.out.println("ponk");
+                break;
         }
     }
 
@@ -284,8 +310,7 @@ public class Game {
             if (i == 0) {
                 playerIDS.put(String.valueOf(i), "Player");
                 playerState.put(playerIDS.get(String.valueOf(i)), true);
-            }
-            else {
+            } else {
                 playerIDS.put(String.valueOf(i), "Computer_" + i);
                 playerState.put(playerIDS.get(String.valueOf(i)), true);
             }
