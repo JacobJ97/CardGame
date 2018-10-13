@@ -173,7 +173,7 @@ public class Head2Head {
         if (mapRankings.get(0).size() == 1) {
             Player player = mapRankings.get(0).get(0);
             if (player.getPlayerBalance() > 0) {
-                player.setPlayerBalance(player.getPlayerBalance() + pot.getPotTotal());
+                player.addWinnings(pot.getPotTotal());
                 player.setTotalWon(pot.getPotTotal());
                 pot.setPotTotal(-pot.getPotTotal());
             }
@@ -193,9 +193,9 @@ public class Head2Head {
                         }
                     }
                 }
-                player.setPlayerBalance(player.getPlayerBalance() + callTotes);
-                player.setTotalWon(pot.getPotTotal() - callTotes);
-                pot.setPotTotal(-player.getTotalWon());
+                player.addWinnings(callTotes);
+                player.setTotalWon(callTotes);
+                pot.emptyPot(-player.getTotalWon());
 
                 for (int v = 1; v < mapRankings.size(); v++) {
                     List<Player> s = mapRankings.get(v);
@@ -210,11 +210,11 @@ public class Head2Head {
                         float c = b * pot.getPotTotal();
                         int totalShared = Math.round(c);
                         playerIndex.setTotalWon(totalShared);
-                        playerIndex.setPlayerBalance(playerIndex.getPlayerBalance() + playerIndex.getTotalWon());
+                        playerIndex.addWinnings(totalShared);
                         totalGone += totalShared;
                     }
-                    pot.setPotTotal(-totalGone);
-                    if (pot.getPotTotal() - totalGone <= 0) {
+                    pot.emptyPot(totalGone);
+                    if (pot.getPotTotal() <= 0) {
                         break;
                     }
                 }
@@ -234,10 +234,10 @@ public class Head2Head {
                     float c = b * pot.getPotTotal();
                     int totalShared = Math.round(c);
                     playerIndex.setTotalWon(totalShared);
-                    playerIndex.setPlayerBalance(playerIndex.getPlayerBalance() + playerIndex.getTotalWon());
+                    playerIndex.addWinnings(totalShared);
                     totalGone += totalShared;
                 }
-                pot.setPotTotal(-totalGone);
+                pot.emptyPot(totalGone);
                 if (pot.getPotTotal() <= 0) {
                     break;
                 }
