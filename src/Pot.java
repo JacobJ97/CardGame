@@ -8,27 +8,31 @@ public class Pot {
     Pot(int smallBlind, int bigBlind) {
         this.smallBlind = smallBlind;
         this.bigBlind = bigBlind;
-        setPotTotal(smallBlind + bigBlind);
-        setCallTotal(bigBlind);
+        setPotTotal(smallBlind);
+        setPotTotal(bigBlind);
     }
 
-    public int getSmallBlind() {
+    int getSmallBlind() {
         return smallBlind;
     }
 
-    public int getBigBlind() {
+    int getBigBlind() {
         return bigBlind;
     }
 
-    public void setSmallBlind(int smallBlind) {
+    void emptyPot(int takeAmount) {
+        this.totalPot -= takeAmount;
+    }
+
+    void setSmallBlind(int smallBlind) {
         this.smallBlind = smallBlind;
     }
 
-    public void setBigBlind(int bigBlind) {
+    void setBigBlind(int bigBlind) {
         this.bigBlind = bigBlind;
     }
 
-    public void setPotTotal(int total) {
+    void setPotTotal(int total) {
         setCallTotal(total);
         totalPot += total;
     }
@@ -39,11 +43,15 @@ public class Pot {
         }
     }
 
-    public int getPotTotal() {
+    void setCallTotalOverride(int bigBlind) {
+        callTotal = bigBlind;
+    }
+
+    int getPotTotal() {
         return totalPot;
     }
 
-    public int getCallTotal() {
+    int getCallTotal() {
         return callTotal;
     }
 }
