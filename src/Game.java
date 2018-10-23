@@ -230,7 +230,6 @@ public class Game {
             ArrayList<Card> cardsAllLogic = new ArrayList<>();
             cardsAllLogic.addAll(player.getPlayerCards());
             cardsAllLogic.addAll(tableCards.getTableCards());
-            //System.out.println(cardsAllLogic);
             Logic logic = new Logic(cardsAllLogic, player);
             Object[] handInformation = logic.determineHand();
             ComputerBrain ai = new ComputerBrain(handInformation, logic);

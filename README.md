@@ -14,9 +14,9 @@ The command line gives instructions on how to play.
 
 ## Versions
 
-### 0.02
-- Fix bug that doesn't completely calculate all cards in AI hand
-- Other minor tweaks and fixes
+### 0.02 [23/10/2018]
+- [Fix] Ensure that all AI cards (hand and table) are calculated
+- [Enhancement] Various removal of commented out code & print statements
 
-### 0.01
+### 0.01 [13/10/2018]
 - Initial Release
