@@ -18,6 +18,7 @@ public class Game {
     private static final int RIVER = 1;
     private static final int[] turnInfo = {INITIAL_DRAW_TO_PLAYERS, FLOP, TURN, RIVER};
     private static String suitFlush;
+    private static CommunityCards tableCards;
 
     //TODO: Refactor code
 
@@ -76,7 +77,7 @@ public class Game {
             //game loop
             int numberOfMoves = turnInfo.length;
             ArrayList<Player> currentPlayers = new ArrayList<>(Arrays.asList(players));
-            CommunityCards tableCards = new CommunityCards();
+            tableCards = new CommunityCards();
             for (int turnNumber = 0; turnNumber < numberOfMoves; turnNumber++) {
                 if (turnNumber >= 1) {
                     ArrayList<Card> cardsOnTable = cards.dealCards(turnInfo[turnNumber]);
@@ -226,7 +227,11 @@ public class Game {
             }
         }
         else {
-            Logic logic = new Logic(player.getPlayerCards(), player);
+            ArrayList<Card> cardsAllLogic = new ArrayList<>();
+            cardsAllLogic.addAll(player.getPlayerCards());
+            cardsAllLogic.addAll(tableCards.getTableCards());
+            //System.out.println(cardsAllLogic);
+            Logic logic = new Logic(cardsAllLogic, player);
             Object[] handInformation = logic.determineHand();
             ComputerBrain ai = new ComputerBrain(handInformation, logic);
             ai.determineMove(turnNumber, playerBetSet);
@@ -234,6 +239,7 @@ public class Game {
             if (move.equals("raise")) {
                 raiseAmount = ai.getRaiseValue();
             }
+            cardsAllLogic.clear();
         }
         playerBetSet.put(player, move);
         switch (move) {
