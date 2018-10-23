@@ -37,6 +37,8 @@ public class Logic {
     private boolean threeOfAKind;
     private String flushSuit;
     private boolean sameSuit;
+    private int maximumSuit;
+    private int straightLength;
 
 
     public Logic(ArrayList<Card> cardsToCompare, Player player) {
@@ -232,6 +234,9 @@ public class Logic {
                 }
                 rankSetter(5);
             }
+            if ((j > straightLength) && passed) {
+                straightLength = j;
+            }
         }
     }
 
@@ -265,6 +270,9 @@ public class Logic {
             if (suitAndQty.get(key) == 2 && cardsInt.length == 2) {
                 sameSuit = true;
             }
+            if (suitAndQty.get(key) > maximumSuit) {
+                maximumSuit = suitAndQty.get(key);
+            }
         }
     }
 
@@ -289,14 +297,21 @@ public class Logic {
         findStraights(cardsIntArray, cardsSuitArray);
         findingPairs(cardsIntArray);
         findTopCards(cardsIntArray);
+        boolean isClose;
         if (handRank == 1) {
             highCardNumbers = highCardNumbersSeperate;
         }
-        if (isFlush) {
-            return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate};
+        if ((straightLength == 3 || straightLength == 4) || (maximumSuit == 3 || maximumSuit == 4)) {
+            isClose = true;
+            return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate, isClose, straightLength, maximumSuit};
+        }
+        else if (isFlush) {
+            isClose = false;
+            return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate, isClose};
         }
         else {
-            return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate};
+            isClose = false;
+            return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate, isClose};
         }
     }
 
