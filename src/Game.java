@@ -10,16 +10,15 @@ public class Game {
     private static String[] cardRanksString = {"High Card", "Pair", "Two Pair", "Three of a Kind", "Straight", "Flush",
     "Full House", "Four of a Kind", "Straight Flush", "Royal Flush"};
     private static String[] ranksInt = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
-    private static int startingCallBet;
 
     /** Card move info */
     private static final int INITIAL_DRAW_TO_PLAYERS = 2;
     private static final int FLOP = 3;
     private static final int TURN = 1;
     private static final int RIVER = 1;
-    private static final int ALL_CARDS_DRAWN = INITIAL_DRAW_TO_PLAYERS + FLOP + TURN + RIVER;
     private static final int[] turnInfo = {INITIAL_DRAW_TO_PLAYERS, FLOP, TURN, RIVER};
     private static String suitFlush;
+    private static CommunityCards tableCards;
 
     //TODO: Refactor code
 
@@ -45,9 +44,8 @@ public class Game {
             int smallBlindIndex;
             int bigBlindIndex;
             Pot pot = new Pot(settings[0] / 100, settings[0] / 50);
-            startingCallBet = pot.getBigBlind();
+            int startingCallBet = pot.getBigBlind();
             Deck cards = new Deck();
-            System.out.println(randPosition);
             randPosition++;
             if (randPosition >= players.length) {
                 randPosition = 0;
@@ -55,7 +53,6 @@ public class Game {
             } else {
                 smallBlindIndex = randPosition;
             }
-            System.out.println(smallBlindIndex);
             //small blind
             players[smallBlindIndex].setPlayerBalance(players[smallBlindIndex].getPlayerBalance() - pot.getSmallBlind());
             System.out.println(players[smallBlindIndex].toString() + " has gotten the small blind, putting a total of $" + pot.getSmallBlind() + " in.");
@@ -80,7 +77,7 @@ public class Game {
             //game loop
             int numberOfMoves = turnInfo.length;
             ArrayList<Player> currentPlayers = new ArrayList<>(Arrays.asList(players));
-            CommunityCards tableCards = new CommunityCards();
+            tableCards = new CommunityCards();
             for (int turnNumber = 0; turnNumber < numberOfMoves; turnNumber++) {
                 if (turnNumber >= 1) {
                     ArrayList<Card> cardsOnTable = cards.dealCards(turnInfo[turnNumber]);
@@ -230,15 +227,18 @@ public class Game {
             }
         }
         else {
-            Logic logic = new Logic(player.getPlayerCards(), player);
+            ArrayList<Card> cardsAllLogic = new ArrayList<>();
+            cardsAllLogic.addAll(player.getPlayerCards());
+            cardsAllLogic.addAll(tableCards.getTableCards());
+            Logic logic = new Logic(cardsAllLogic, player);
             Object[] handInformation = logic.determineHand();
             ComputerBrain ai = new ComputerBrain(handInformation, logic);
             ai.determineMove(turnNumber, playerBetSet);
             move = ai.getMove();
-            System.out.println(move);
             if (move.equals("raise")) {
                 raiseAmount = ai.getRaiseValue();
             }
+            cardsAllLogic.clear();
         }
         playerBetSet.put(player, move);
         switch (move) {
@@ -277,11 +277,9 @@ public class Game {
                 break;
             }
             case "fold":
+                System.out.println(player + " has folded.");
                 player.fold();
                 playerState.put(playerIDS.get(String.valueOf(index)), false);
-                break;
-            default:
-                System.out.println("ponk");
                 break;
         }
     }
