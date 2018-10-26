@@ -151,10 +151,10 @@ public class Game {
                     System.out.print("Congrats to: ");
                     for (int j = 0; j < winners.size(); j++) {
                         Player winner = winners.get(j);
-                        System.out.print(winner + "for winning a total of $" + winner.getTotalWon() + "with a " + cardRanksString[winner.getPlayerHandRank() - 1]);
+                        System.out.print(winner + ", for winning a total of $" + winner.getTotalWon() + " with a " + cardRanksString[winner.getPlayerHandRank() - 1]);
                         getWinningMessage(winner.getPlayerHandRank(), winner.getPlayerHighlightCards());
                         if (winners.size() - j != 0) {
-                            System.out.print("& ");
+                            System.out.print(" & ");
                         }
                     }
                 }
