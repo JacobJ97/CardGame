@@ -14,6 +14,12 @@ The command line gives instructions on how to play.
 
 ## Versions
 
+### 0.1 [???]
+- [Fix] Head2Head class returning the wrong player when determining a winner
+- [Fix] Modify round betting loop to ensure betting ends once all players have placed equal bets in (when possible)
+- [Fix] Improvement of calling after a raise that wasn't from the first player
+- [Enchancement] AI has drastic improvements after the flop
+
 ### 0.02 [23/10/2018]
 - [Fix] Ensure that all AI cards (hand and table) are calculated
 - [Enhancement] Various removal of commented out code & print statements
