@@ -157,8 +157,15 @@ public class Head2Head {
                 }
             }
             else {
-                mapRankings.put(d, playerList);
-                mapRankings.get(d).add(players.get(d));
+                if (sortedHandRank.get(players.get(d)) > sortedHandRank.get(players.get(d+1))) {
+                    mapRankings.put(d, playerList);
+                    mapRankings.get(d).add(players.get(d));
+                }
+                else {
+                    mapRankings.put(d, playerList);
+                    mapRankings.get(d).add(players.get(d+1));
+                }
+
             }
         }
 
@@ -173,9 +180,9 @@ public class Head2Head {
         if (mapRankings.get(0).size() == 1) {
             Player player = mapRankings.get(0).get(0);
             if (player.getPlayerBalance() > 0) {
-                player.addWinnings(pot.getPotTotal());
-                player.setTotalWon(pot.getPotTotal());
-                pot.setPotTotal(-pot.getPotTotal());
+                player.addWinnings(totalPot);
+                player.setTotalWon(totalPot);
+                pot.emptyPot(totalPot);
             }
             else {
                 int callTotes = 0;
@@ -195,7 +202,7 @@ public class Head2Head {
                 }
                 player.addWinnings(callTotes);
                 player.setTotalWon(callTotes);
-                pot.emptyPot(-player.getTotalWon());
+                pot.emptyPot(callTotes);
 
                 for (int v = 1; v < mapRankings.size(); v++) {
                     List<Player> s = mapRankings.get(v);
@@ -233,6 +240,7 @@ public class Head2Head {
                     float b = a / callTotes;
                     float c = b * pot.getPotTotal();
                     int totalShared = Math.round(c);
+                    System.out.println(totalShared);
                     playerIndex.setTotalWon(totalShared);
                     playerIndex.addWinnings(totalShared);
                     totalGone += totalShared;
@@ -242,7 +250,6 @@ public class Head2Head {
                     break;
                 }
             }
-
         }
     }
 
