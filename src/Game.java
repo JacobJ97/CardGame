@@ -79,6 +79,9 @@ public class Game {
             ArrayList<Player> currentPlayers = new ArrayList<>(Arrays.asList(players));
             tableCards = new CommunityCards();
             for (int turnNumber = 0; turnNumber < numberOfMoves; turnNumber++) {
+                if (currentPlayers.size() == 1) {
+                    break;
+                }
                 if (turnNumber >= 1) {
                     ArrayList<Card> cardsOnTable = cards.dealCards(turnInfo[turnNumber]);
                     tableCards.setTableCards(cardsOnTable);
@@ -91,7 +94,7 @@ public class Game {
                     currentPlayers.get(f).clearRoundBet();
                 }
                 while (!allCall) {
-                    for (int playerTurn = 0; playerTurn < currentPlayers.size(); playerTurn++) {
+                    for (int playerTurn = 0; playerTurn < currentPlayers.size() && !allCall; playerTurn++) {
                         inputsInGame(currentPlayers.get(playerTurn), playerTurn, pot, turnNumber);
                         if (playerBetSet.get(currentPlayers.get(playerTurn)).equals("fold")) {
                             currentPlayers.remove(currentPlayers.get(playerTurn));
@@ -100,23 +103,26 @@ public class Game {
                             System.out.println(currentPlayers.get(0) + " has won a total of $" + pot.getPotTotal());
                             currentPlayers.get(0).addWinnings(pot.getPotTotal());
                             allCall = true;
-
+                            break;
                         }
                         for (int d = 0; d < currentPlayers.size() - 1; d++) {
-                            allCall = true;
-                            if (currentPlayers.get(d).getTotalBetted() != currentPlayers.get(d+1).getTotalBetted()) {
-                                if (currentPlayers.get(d).getPlayerBalance() == 0) {continue;}
-                                else if (currentPlayers.get(d+1).getPlayerBalance() == 0) {continue;}
-                                else {
+                            if (currentPlayers.get(d).getRoundBet() != currentPlayers.get(d + 1).getRoundBet()) {
+                                if (currentPlayers.get(d).getPlayerBalance() == 0) {
+                                    continue;
+                                } else if (currentPlayers.get(d + 1).getPlayerBalance() == 0) {
+                                    continue;
+                                } else {
                                     allCall = false;
                                     break;
                                 }
+                            } else {
+                                allCall = true;
                             }
                         }
                     }
-                }
-                if (currentPlayers.size() == 1) {
-                    break;
+                    if (currentPlayers.size() == 1) {
+                        break;
+                    }
                 }
             }
             if (currentPlayers.size() > 1) {
@@ -184,10 +190,10 @@ public class Game {
             System.out.print(" of " + ranksInt[(winningCards.get(0) - 1)]);
         }
         else if (rank == 3 || rank == 7) {
-            System.out.print(" of " + ranksInt[(winningCards.get(0) - 1)] + "& " + ranksInt[(winningCards.get(1) - 1)]);
+            System.out.print(" of " + ranksInt[(winningCards.get(0) - 1)] + " & " + ranksInt[(winningCards.get(1) - 1)]);
         }
         else if (rank == 5 || rank == 9 || rank == 10) {
-            System.out.print(" that is between " + ranksInt[(winningCards.get(0) - 1)] + "& " + ranksInt[(winningCards.get(1) - 1)]);
+            System.out.print(" that is between " + ranksInt[(winningCards.get(0) - 1)] + " & " + ranksInt[(winningCards.get(1) - 1)]);
         }
         else {
             System.out.print(" of " + suitFlush);
@@ -247,13 +253,29 @@ public class Game {
                 if (call > player.getPlayerBalance()) {
                     call = player.getPlayerBalance();
                     pot.setPotTotal(call);
+                    player.setRoundBet(call);
                     player.setPlayerBalance(0);
+                    player.setTotalBetted(call);
+                    System.out.println(player + " has called a total of $" + call);
                 } else {
-                    pot.setPotTotal(call);
-                    player.setPlayerBalance(player.getPlayerBalance() - call);
+                    if (player.getRoundBet() > 0) {
+                        call = pot.getCallTotal() - player.getRoundBet();
+                        pot.setPotTotal(call);
+                        player.setRoundBet(call);
+                        player.setPlayerBalance(player.getPlayerBalance() - call);
+                        player.setTotalBetted(call);
+                        //if (call != 0) {
+                            System.out.println(player + " has called a total of $" + call);
+                        //}
+                    }
+                    else {
+                        pot.setPotTotal(call);
+                        player.setRoundBet(call);
+                        player.setPlayerBalance(player.getPlayerBalance() - call);
+                        player.setTotalBetted(call);
+                        System.out.println(player + " has called a total of $" + call);
+                    }
                 }
-                player.setTotalBetted(call);
-                System.out.println(player + " has called a total of $" + call);
                 break;
             }
             case "raise": {
@@ -266,13 +288,14 @@ public class Game {
                     raiseAmount = player.getPlayerBalance();
                     pot.setPotTotal(raiseAmount);
                     player.setRoundBet(raiseAmount);
+                    player.setTotalBetted(raiseAmount);
                     player.setPlayerBalance(0);
                 } else {
                     pot.setPotTotal(call + raiseAmount);
-                    player.setRoundBet(raiseAmount);
+                    player.setRoundBet(call + raiseAmount);
+                    player.setTotalBetted(call + raiseAmount);
                     player.setPlayerBalance(player.getPlayerBalance() - (call + raiseAmount));
                 }
-                player.setTotalBetted(call + raiseAmount);
                 System.out.println(player + " has raised it by $" + raiseAmount + " to bring the bet total to $" + (call + raiseAmount));
                 break;
             }
