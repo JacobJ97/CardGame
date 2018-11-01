@@ -12,6 +12,7 @@ public class Player {
     private int highestUniqueCard;
     private int rank;
     private int roundBet;
+    private int highestUniqueCardIndex;
 
     Player(String name, int playerBalance) {
         this.name = name;
@@ -89,6 +90,10 @@ public class Player {
     void setPlayerHighestUniqueCard(int highestUniqueCard) {
         this.highestUniqueCard = highestUniqueCard;
     }
+
+    void setPlayerHighestUniqueCardIndex(int highestUniqueCardIndex) {this.highestUniqueCardIndex = highestUniqueCardIndex; }
+
+    int getHighestUniqueCardIndex() {return highestUniqueCardIndex;}
 
     void setTotalWon(int totalWon) {
         this.totalWon = totalWon;

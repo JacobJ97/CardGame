@@ -5,7 +5,6 @@ public class Head2Head {
 
     private Map<Player, Object[]> allPlayerInfo;
     private int topHand;
-    private int winningHighCard;
     private Player winningPlayer;
     private Map<Player, Integer> topHandMap = new HashMap<>();
     private ArrayList<Player> playersWon = new ArrayList<>();
@@ -45,9 +44,6 @@ public class Head2Head {
            }
            else if (handRank == topHand) {
                 boolean isTie = true;
-                if (handRank == 3) {
-
-                }
                 if (handRank == 6) {
                     Collections.sort(handCards);
                 }
@@ -77,14 +73,16 @@ public class Head2Head {
                             isTie = false;
                             teritaryRankComp.put(player, a);
                             mapSetter(player, handRank, handCards, top5cards, true);
+                            player.setPlayerHighestUniqueCardIndex(i);
                             player.setPlayerHighestUniqueCard(a);
-                        } else if (b > a) {
-                            isTie = true;
-                            teritaryRankComp.put(player, a);
                             break;
-                        } else {
-                            continue;
-                        }
+                        } else if (a < b) {
+                            isTie = false;
+                            teritaryRankComp.put(winningPlayer, b);
+                            winningPlayer.setPlayerHighestUniqueCardIndex(i);
+                            winningPlayer.setPlayerHighestUniqueCard(b);
+                            break;
+                        } else { continue; }
                     }
                     if (isTie) {
                         playersWon.add(player);
@@ -103,9 +101,6 @@ public class Head2Head {
         Map<Integer, List<Player>> mapRankings = new HashMap<>();
         for (int d = 0; d < players.size() - 1; d++) {
             List<Player> playerList = new ArrayList<>();
-            System.out.println(sortedHandRank);
-            System.out.println(secondarySortedRank);
-            System.out.println(teritarySortedRank);
             if (sortedHandRank.get(players.get(d)).equals(sortedHandRank.get(players.get(d+1)))) {
                 if (secondarySortedRank.size() >= 1) {
                     ArrayList<Player> winner = new ArrayList<>(secondarySortedRank.keySet());
@@ -138,9 +133,6 @@ public class Head2Head {
                 }
             }
         }
-
-        System.out.println(mapRankings);
-
         for (Integer standing : mapRankings.keySet()) {
             List<Player> player = mapRankings.get(standing);
             for (int d = 0; d < player.size(); d++) {
@@ -176,52 +168,33 @@ public class Head2Head {
                 player.setTotalWon(callTotes);
                 pot.emptyPot(callTotes);
 
-                for (int v = 1; v < mapRankings.size(); v++) {
-                    List<Player> s = mapRankings.get(v);
-                    callTotes = 0;
-                    int totalGone = 0;
-                    for (Player playerIndex : s) {
-                        callTotes += playerIndex.getTotalBetted();
-                    }
-                    for (Player playerIndex : s) {
-                        int a = playerIndex.getTotalBetted();
-                        float b = a / callTotes;
-                        float c = b * pot.getPotTotal();
-                        int totalShared = Math.round(c);
-                        playerIndex.setTotalWon(totalShared);
-                        playerIndex.addWinnings(totalShared);
-                        totalGone += totalShared;
-                    }
-                    pot.emptyPot(totalGone);
-                    if (pot.getPotTotal() <= 0) {
-                        break;
-                    }
+                List<Player> s = mapRankings.get(1);
+                int numOfPlayers = s.size();
+                int potErase = pot.getPotTotal();
+                for (int v = 0; v < numOfPlayers; v++) {
+                    callTotes = s.get(v).getTotalBetted();
+                    int b = pot.getPotTotal() - (pot.getPotTotal() - callTotes);
+                    int c = ((pot.getPotTotal() - callTotes) - (pot.getPotTotal() / numOfPlayers));
+                    int totalShared = Math.round(b + c);
+                    s.get(v).setTotalWon(totalShared);
+                    s.get(v).addWinnings(totalShared);
                 }
+                pot.emptyPot(potErase);
             }
         }
         else {
-            for (int v = 0; v < mapRankings.size(); v++) {
-                List<Player> s = mapRankings.get(v);
-                int callTotes = 0;
-                int totalGone = 0;
-                for (Player playerIndex : s) {
-                    callTotes += playerIndex.getTotalBetted();
-                }
-                for (Player playerIndex : s) {
-                    int a = playerIndex.getTotalBetted();
-                    float b = a / callTotes;
-                    float c = b * pot.getPotTotal();
-                    int totalShared = Math.round(c);
-                    System.out.println(totalShared);
-                    playerIndex.setTotalWon(totalShared);
-                    playerIndex.addWinnings(totalShared);
-                    totalGone += totalShared;
-                }
-                pot.emptyPot(totalGone);
-                if (pot.getPotTotal() <= 0) {
-                    break;
-                }
+            List<Player> s = mapRankings.get(0);
+            int numOfPlayers = s.size();
+            int potErase = pot.getPotTotal();
+            for (int v = 0; v < numOfPlayers; v++) {
+                int callTotes = s.get(v).getTotalBetted();
+                int b = pot.getPotTotal() - (pot.getPotTotal() - callTotes);
+                int c = ((pot.getPotTotal() - callTotes) - (pot.getPotTotal() / numOfPlayers));
+                int totalShared = Math.round(b + c);
+                s.get(v).setTotalWon(totalShared);
+                s.get(v).addWinnings(totalShared);
             }
+            pot.emptyPot(potErase);
         }
     }
 
@@ -250,6 +223,9 @@ public class Head2Head {
         else if (handRank == 5 || handRank == 9 || handRank == 10) {
             winningHandNums.add(handCards.get(0));
             winningHandNums.add(handCards.get(handCards.size() - 1));
+        }
+        else if (handRank == 1) {
+            winningHandNums.add(handCards.get(player.getHighestUniqueCardIndex()));
         }
         player.setPlayerHighlightCards(winningHandNums);
     }
