@@ -53,14 +53,14 @@ public class ComputerBrain {
             if (move.equals("raise")) {
                 a =+ 1;
                 b =+ 14;
-                c =+ 35;
-                d =+ 50;
+                c =+ 50;
+                d =+ 35;
             }
             else if (move.equals("call")) {
                 a =+ 1;
                 b =+ 24;
-                c =+ 45;
-                d =+ 30;
+                c =+ 55;
+                d =+ 25;
             }
             else if (move.equals("fold")) {
                 a =+ 1;
@@ -104,10 +104,10 @@ public class ComputerBrain {
                     else {
                         if (highHand2 >= 10 && highHand2 <= 13) {
                             if (sameSuit) {
-                                randomMoveDecider(a + 1, b + 10, c + 89, d);
+                                randomMoveDecider(a + 1, b + 10, c + 89, 0);
                             }
                             else {
-                                randomMoveDecider(a + 1, b + 5, c + 94, d);
+                                randomMoveDecider(a + 1, b + 5, c + 94,0);
                             }
                         }
                         else {
@@ -132,7 +132,7 @@ public class ComputerBrain {
                     else {
                         if (highHand2 >= 10 && highHand2 <= 13) {
                             if (sameSuit) {
-                                randomMoveDecider(a + 1, b + 5, c + 94, d);
+                                randomMoveDecider(a + 1, b + 5, c + 94, 0);
                             }
                             else {
                                 randomMoveDecider(a + 1, b + 2, c + 90, d + 7);
@@ -160,11 +160,11 @@ public class ComputerBrain {
             }
 
             if (handRank >= 7) {
-                randomMoveDecider(a + 3, b + 40, c + 57, 0);
+                randomMoveDecider(a + 2, b + 38, c + 60, 0);
             }
 
             if (handRank >= 6) {
-                randomMoveDecider(a + 3, b + 40, c + 57, 0);
+                randomMoveDecider(a + 1, b + 36, c + 63, 0);
             }
 
             if (handRank >= 5) {
@@ -173,33 +173,33 @@ public class ComputerBrain {
 
             if (handRank >= 4) {
                 if (suitNum == 3) {
-                    randomMoveDecider(a + 1, b + 35, c + 64, d + 1);
+                    randomMoveDecider(a + 1, b + 25, c + 73, d + 2);
                 } else if (suitNum == 4) {
-                    randomMoveDecider(a + 1, b + 35, c + 64, d + 1);
+                    randomMoveDecider(a + 1, b + 30, c + 68, d + 1);
                 }
                 else if (straightNum == 3) {
-                    randomMoveDecider(a + 1, b + 35, c + 64, d + 1);
+                    randomMoveDecider(a + 1, b + 23, c + 72, d + 4);
                 }
                 else if (straightNum == 4) {
-                    randomMoveDecider(a + 1, b + 35, c + 64, d + 1);
+                    randomMoveDecider(a + 1, b + 27, c + 70, d + 2);
                 } else {
-                    randomMoveDecider(a + 1, b + 35, c + 64, d + 1);
+                    randomMoveDecider(a + 1, b + 20, c + 74, d + 5);
                 }
             }
 
             if (handRank >= 3) {
                 if (suitNum == 3) {
-                    randomMoveDecider(a + 1, b + 35, c + 64, d + 1);
+                    randomMoveDecider(a + 1, b + 20, c + 74, d + 5);
                 } else if (suitNum == 4) {
-                    randomMoveDecider(a + 1, b + 35, c + 64, d + 1);
+                    randomMoveDecider(a + 1, b + 24, c + 72, d + 3);
                 }
                 else if (straightNum == 3) {
-                    randomMoveDecider(a + 1, b + 35, c + 64, d + 1);
+                    randomMoveDecider(a + 1, b + 17, c + 75, d + 7);
                 }
                 else if (straightNum == 4) {
-                    randomMoveDecider(a + 1, b + 35, c + 64, d + 1);
+                    randomMoveDecider(a + 1, b + 20, c + 74, d + 5);
                 } else {
-                    randomMoveDecider(a + 1, b + 35, c + 64, d + 1);
+                    randomMoveDecider(a + 1, b + 15, c + 74, d + 10);
                 }
             }
 
@@ -207,31 +207,31 @@ public class ComputerBrain {
                 if (suitNum == 3) {
                     randomMoveDecider(a + 1, b + 20, c + 69, d + 10);
                 } else if (suitNum == 4) {
-                    randomMoveDecider(a + 1, b + 20, c + 69, d + 10);
+                    randomMoveDecider(a + 1, b + 22, c + 69, d + 8);
                 }
                 else if (straightNum == 3) {
-                    randomMoveDecider(a + 1, b + 20, c + 69, d + 10);
+                    randomMoveDecider(a + 1, b + 17, c + 69, d + 12);
                 }
                 else if (straightNum == 4) {
                     randomMoveDecider(a + 1, b + 20, c + 69, d + 10);
                 } else {
-                    randomMoveDecider(a + 1, b + 20, c + 69, d + 10);
+                    randomMoveDecider(a + 1, b + 15, c + 69, d + 14);
                 }
             }
 
             if (handRank == 1) {
                 if (suitNum == 3) {
-                    randomMoveDecider(a + 1, b + 14, c + 35, d + 50);
+                    randomMoveDecider(a + 1, b + 18, c + 56, d + 25);
                 } else if (suitNum == 4) {
-                    randomMoveDecider(a + 1, b + 14, c + 35, d + 50);
+                    randomMoveDecider(a + 1, b + 20, c + 58, d + 21);
                 }
                 else if (straightNum == 3) {
-                    randomMoveDecider(a + 1, b + 14, c + 35, d + 50);
+                    randomMoveDecider(a + 1, b + 15, c + 55, d + 29);
                 }
                 else if (straightNum == 4) {
-                    randomMoveDecider(a + 1, b + 14, c + 35, d + 50);
+                    randomMoveDecider(a + 1, b + 18, c + 56, d + 25);
                 } else {
-                    randomMoveDecider(a + 1, b + 14, c + 35, d + 50);
+                    randomMoveDecider(a + 1, b + 15, c + 50, d + 34);
                 }
             }
         }
@@ -258,65 +258,65 @@ public class ComputerBrain {
 
             if (handRank >= 4) {
                 if (suitNum == 3) {
-                    randomMoveDecider(a + 5, b + 25, c + 69, d + 1);
+                    randomMoveDecider(a + 5, b + 20, c + 74, d + 1);
                 } else if (suitNum == 4) {
-                    randomMoveDecider(a + 5, b + 25, c + 69, d + 1);
+                    randomMoveDecider(a + 5, b + 23, c + 71, d + 1);
                 }
                 else if (straightNum == 3) {
-                    randomMoveDecider(a + 5, b + 25, c + 69, d + 1);
+                    randomMoveDecider(a + 5, b + 18, c + 75, d + 2);
                 }
                 else if (straightNum == 4) {
-                    randomMoveDecider(a + 5, b + 25, c + 69, d + 1);
+                    randomMoveDecider(a + 5, b + 20, c + 74, d + 1);
                 } else {
-                    randomMoveDecider(a + 5, b + 25, c + 69, d + 1);
+                    randomMoveDecider(a + 5, b + 15, c + 77, d + 3);
                 }
             }
 
             if (handRank >= 3) {
                 if (suitNum == 3) {
-                    randomMoveDecider(a + 5, b + 25, c + 69, d + 1);
+                    randomMoveDecider(a + 5, b + 15, c + 78, d + 2);
                 } else if (suitNum == 4) {
-                    randomMoveDecider(a + 5, b + 25, c + 69, d + 1);
+                    randomMoveDecider(a + 5, b + 18, c + 76, d + 1);
                 }
                 else if (straightNum == 3) {
-                    randomMoveDecider(a + 5, b + 25, c + 69, d + 1);
+                    randomMoveDecider(a + 5, b + 13, c + 79, d + 3);
                 }
                 else if (straightNum == 4) {
-                    randomMoveDecider(a + 5, b + 25, c + 69, d + 1);
+                    randomMoveDecider(a + 5, b + 15, c + 78, d + 2);
                 } else {
-                    randomMoveDecider(a + 5, b + 25, c + 69, d + 1);
+                    randomMoveDecider(a + 5, b + 10, c + 80, d + 5);
                 }
             }
 
             if (handRank >= 2) {
                 if (suitNum == 3) {
-                    randomMoveDecider(a + 1, b + 9, c + 60, d + 30);
+                    randomMoveDecider(a + 1, b + 15, c + 74, d + 10);
                 } else if (suitNum == 4) {
-                    randomMoveDecider(a + 1, b + 9, c + 60, d + 30);
+                    randomMoveDecider(a + 1, b + 15, c + 77, d + 7);
                 }
                 else if (straightNum == 3) {
-                    randomMoveDecider(a + 1, b + 9, c + 60, d + 30);
+                    randomMoveDecider(a + 1, b + 15, c + 72, d + 12);
                 }
                 else if (straightNum == 4) {
-                    randomMoveDecider(a + 1, b + 9, c + 60, d + 30);
+                    randomMoveDecider(a + 1, b + 15, c + 74, d + 10);
                 } else {
-                    randomMoveDecider(a + 1, b + 9, c + 60, d + 30);
+                    randomMoveDecider(a + 1, b + 10, c + 74, d + 15);
                 }
             }
 
             if (handRank == 1) {
                 if (suitNum == 3) {
-                    randomMoveDecider(a + 1, b + 10, c + 30, d + 69);
+                    randomMoveDecider(a + 1, b + 10, c + 59, d + 30);
                 } else if (suitNum == 4) {
-                    randomMoveDecider(a + 1, b + 10, c + 30, d + 69);
+                    randomMoveDecider(a + 1, b + 10, c + 69, d + 20);
                 }
                 else if (straightNum == 3) {
-                    randomMoveDecider(a + 1, b + 10, c + 30, d + 69);
+                    randomMoveDecider(a + 1, b + 10, c + 54, d + 35);
                 }
                 else if (straightNum == 4) {
-                    randomMoveDecider(a + 1, b + 10, c + 30, d + 69);
+                    randomMoveDecider(a + 1, b + 10, c + 59, d + 30);
                 } else {
-                    randomMoveDecider(a + 1, b + 10, c + 30, d + 69);
+                    randomMoveDecider(a + 1, b + 10, c + 50, d + 39);
                 }
             }
         }
@@ -338,20 +338,20 @@ public class ComputerBrain {
             }
 
             if (handRank >= 5) {
-                randomMoveDecider(a + 5, b + 40, c + 50, d + 5);
+                randomMoveDecider(a + 5, b + 44, c + 50, d + 1);
             }
 
             if (handRank >= 4) {
                 if (suitNum == 3) {
                     randomMoveDecider(a + 5, b + 40, c + 50, d + 5);
                 } else if (suitNum == 4) {
-                    randomMoveDecider(a + 5, b + 40, c + 50, d + 5);
+                    randomMoveDecider(a + 5, b + 44, c + 50, d + 1);
                 }
                 else if (straightNum == 3) {
                     randomMoveDecider(a + 5, b + 40, c + 50, d + 5);
                 }
                 else if (straightNum == 4) {
-                    randomMoveDecider(a + 5, b + 40, c + 50, d + 5);
+                    randomMoveDecider(a + 5, b + 44, c + 50, d + 1);
                 } else {
                     randomMoveDecider(a + 5, b + 40, c + 50, d + 5);
                 }
@@ -359,49 +359,49 @@ public class ComputerBrain {
 
             if (handRank >= 3) {
                 if (suitNum == 3) {
-                    randomMoveDecider(a + 5, b + 40, c + 50, d + 5);
+                    randomMoveDecider(a + 5, b + 35, c + 50, d + 10);
                 } else if (suitNum == 4) {
-                    randomMoveDecider(a + 5, b + 40, c + 50, d + 5);
+                    randomMoveDecider(a + 5, b + 43, c + 50, d + 2);
                 }
                 else if (straightNum == 3) {
-                    randomMoveDecider(a + 5, b + 40, c + 50, d + 5);
+                    randomMoveDecider(a + 5, b + 40, c + 50, d + 10);
                 }
                 else if (straightNum == 4) {
-                    randomMoveDecider(a + 5, b + 40, c + 50, d + 5);
+                    randomMoveDecider(a + 5, b + 43, c + 50, d + 2);
                 } else {
-                    randomMoveDecider(a + 5, b + 40, c + 50, d + 5);
+                    randomMoveDecider(a + 5, b + 40, c + 50, d + 10);
                 }
             }
 
             if (handRank >= 2) {
                 if (suitNum == 3) {
-                    randomMoveDecider(a + 1, b + 20, c + 65, d + 10);
+                    randomMoveDecider(a + 1, b + 30, c + 54, d + 15);
                 } else if (suitNum == 4) {
-                    randomMoveDecider(a + 1, b + 20, c + 65, d + 10);
+                    randomMoveDecider(a + 1, b + 40, c + 56, d + 3);
                 }
                 else if (straightNum == 3) {
-                    randomMoveDecider(a + 1, b + 20, c + 65, d + 10);
+                    randomMoveDecider(a + 1, b + 30, c + 54, d + 15);
                 }
                 else if (straightNum == 4) {
-                    randomMoveDecider(a + 1, b + 20, c + 65, d + 10);
+                    randomMoveDecider(a + 1, b + 40, c + 56, d + 3);
                 } else {
-                    randomMoveDecider(a + 1, b + 20, c + 65, d + 10);
+                    randomMoveDecider(a + 1, b + 30, c + 54, d + 15);
                 }
             }
 
             if (handRank == 1) {
                 if (suitNum == 3) {
-                    randomMoveDecider(a + 1, b + 10, c + 24, d + 75);
+                    randomMoveDecider(a + 1, b + 37, c + 37, d + 35);
                 } else if (suitNum == 4) {
-                    randomMoveDecider(a + 1, b + 10, c + 24, d + 75);
+                    randomMoveDecider(a + 1, b + 44, c + 40, d + 15);
                 }
                 else if (straightNum == 3) {
-                    randomMoveDecider(a + 1, b + 10, c + 24, d + 75);
+                    randomMoveDecider(a + 1, b + 37, c + 37, d + 35);
                 }
                 else if (straightNum == 4) {
-                    randomMoveDecider(a + 1, b + 10, c + 24, d + 75);
+                    randomMoveDecider(a + 1, b + 44, c + 40, d + 15);
                 } else {
-                    randomMoveDecider(a + 1, b + 10, c + 24, d + 75);
+                    randomMoveDecider(a + 1, b + 37, c + 37, d + 35);
                 }
             }
         }
