@@ -143,46 +143,11 @@ public class Head2Head {
         int totalPot = pot.getPotTotal();
         if (mapRankings.get(0).size() == 1) {
             Player player = mapRankings.get(0).get(0);
-            if (player.getPlayerBalance() > 0) {
-                player.addWinnings(totalPot);
-                player.setTotalWon(totalPot);
-                pot.emptyPot(totalPot);
-            }
-            else {
-                int callTotes = 0;
-                for (Integer standing : mapRankings.keySet()) {
-                    List<Player> individualPlayer = mapRankings.get(standing);
-                    for (Player playerLoop : individualPlayer) {
-                        if (playerLoop.getTotalBetted() > player.getTotalBetted()) {
-                            int variance = playerLoop.getTotalBetted() - player.getTotalBetted();
-                            callTotes += player.getTotalBetted();
-                            playerLoop.setTotalBetted(-playerLoop.getTotalBetted() + variance);
-                        } else {
-                            callTotes += playerLoop.getTotalBetted();
-                            playerLoop.setTotalBetted(-playerLoop.getTotalBetted());
-                            mapRankings.remove(standing, playerLoop);
-                        }
-                    }
-                }
-                player.addWinnings(callTotes);
-                player.setTotalWon(callTotes);
-                pot.emptyPot(callTotes);
+            player.addWinnings(totalPot);
+            player.setTotalWon(totalPot);
+            pot.emptyPot(totalPot);
 
-                List<Player> s = mapRankings.get(1);
-                int numOfPlayers = s.size();
-                int potErase = pot.getPotTotal();
-                for (int v = 0; v < numOfPlayers; v++) {
-                    callTotes = s.get(v).getTotalBetted();
-                    int b = pot.getPotTotal() - (pot.getPotTotal() - callTotes);
-                    int c = ((pot.getPotTotal() - callTotes) - (pot.getPotTotal() / numOfPlayers));
-                    int totalShared = Math.round(b + c);
-                    s.get(v).setTotalWon(totalShared);
-                    s.get(v).addWinnings(totalShared);
-                }
-                pot.emptyPot(potErase);
-            }
-        }
-        else {
+        } else {
             List<Player> s = mapRankings.get(0);
             int numOfPlayers = s.size();
             int potErase = pot.getPotTotal();

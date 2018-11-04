@@ -69,10 +69,7 @@ public class ComputerBrain {
                 d =+ 10;
             }
         }
-
         a = (a / playerMoves.size()) - ((1 + 5) / 3);
-        //
-        //
         b = (b / playerMoves.size()) - ((14 + 25 + 35) / 3);
         c = (c / playerMoves.size()) - ((35 + 50 + 50) / 3);
         d = (d / playerMoves.size()) - ((50 + 15 + 10) / 3);

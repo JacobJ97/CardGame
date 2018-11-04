@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Logic {
+class Logic {
 
     /**
      * Rankings
@@ -39,9 +39,10 @@ public class Logic {
     private boolean sameSuit;
     private int maximumSuit;
     private int straightLength;
+    private int highestCard;
 
 
-    public Logic(ArrayList<Card> cardsToCompare, Player player) {
+    Logic(ArrayList<Card> cardsToCompare, Player player) {
         this.cardsToCompare = cardsToCompare;
         this.player = player;
         cardInfo = determineHandRanking();
@@ -51,7 +52,7 @@ public class Logic {
         return cardIntValue.get(rank);
     }
 
-    Object[] determineHandRanking() {
+    private Object[] determineHandRanking() {
         int i = 0;
         String[] cardSuitArray = new String[cardsToCompare.size()];
         int[] cardIntArray = new int[cardsToCompare.size()];
@@ -64,7 +65,7 @@ public class Logic {
         return new Object[] {cardSuitArray, cardIntArray};
     }
 
-    void findingPairs(int[] cardsNum) {
+    private void findingPairs(int[] cardsNum) {
         Integer[] cardsInt = Arrays.stream(cardsNum).boxed().toArray(Integer[]::new);
         ArrayList<Integer> singlePair = new ArrayList<>();
         Arrays.sort(cardsInt, Collections.reverseOrder());
@@ -167,7 +168,7 @@ public class Logic {
         }
     }
 
-    void findStraights(int[] cardsInt, String[] cardsSuit) {
+    private void findStraights(int[] cardsInt, String[] cardsSuit) {
         Map<Integer, String> cardAndSuit = new HashMap<>();
         for (int i = 0; i < cardsToCompare.size(); i++) {
             cardAndSuit.put(cardsInt[i], cardsSuit[i]);
@@ -240,7 +241,7 @@ public class Logic {
         }
     }
 
-    void findFlush(int[] cardsInt, String[] cardsSuit) {
+    private void findFlush(int[] cardsInt, String[] cardsSuit) {
         Map<String, Integer> suitAndQty = new HashMap<>();
         Map<String, List<Integer>> suitAndCard = new HashMap<>();
         int s = cardsInt.length - 1;
@@ -276,7 +277,7 @@ public class Logic {
         }
     }
 
-    void findTopCards(int[] cardsIntArray) {
+    private void findTopCards(int[] cardsIntArray) {
         Arrays.sort(cardsIntArray);
         int counter;
         if (cardsIntArray.length <= 5) {
@@ -285,6 +286,9 @@ public class Logic {
             counter = cardsIntArray.length - 5;
         }
         for (var c = cardsIntArray.length - 1; c >= counter; c--) {
+            if (c == cardsIntArray.length - 1) {
+                highestCard = cardsIntArray[c];
+            }
             highCardNumbersSeperate.add(cardsIntArray[c]);
         }
         rankSetter(1);
@@ -304,10 +308,6 @@ public class Logic {
         if ((straightLength == 3 || straightLength == 4) || (maximumSuit == 3 || maximumSuit == 4)) {
             isClose = true;
             return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate, isClose, straightLength, maximumSuit};
-        }
-        else if (isFlush) {
-            isClose = false;
-            return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate, isClose};
         }
         else {
             isClose = false;
@@ -331,5 +331,11 @@ public class Logic {
 
     boolean isSameSuit() {
         return sameSuit;
+    }
+
+    int getHighestCard() { return highestCard;}
+
+    ArrayList<Integer> getHighCardNumbers() {
+        return highCardNumbers;
     }
 }

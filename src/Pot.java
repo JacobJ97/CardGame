@@ -37,9 +37,16 @@ public class Pot {
         totalPot += total;
     }
 
+    void setPotTotal(int total, int potCallTotal) {
+        if (total > callTotal) {
+            callTotal += total - potCallTotal;
+        }
+        totalPot += total;
+    }
+
     private void setCallTotal(int bet) {
         if (bet > callTotal) {
-            callTotal = bet;
+            callTotal =+ bet;
         }
     }
 
