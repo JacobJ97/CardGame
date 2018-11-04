@@ -29,6 +29,7 @@ The command line gives instructions on how to play.
 - [Fix] "Raise" move was modified and rewritten to better make sense and not break anything
 - [Fix] When a player hits a cash value of 0, it will not allow them to make any moves whatsoever
 - [Removal] When a player wins a round despite betting less, they will win everything in the pot rather than winning relative to what they bet
+- BIG FUN SURPRISE!!
 
 ### 0.02 [23/10/2018]
 - [Fix] Ensure that all AI cards (hand and table) are calculated

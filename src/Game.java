@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class Game {
@@ -382,6 +381,33 @@ public class Game {
         return logic.determineHand();
     }
 
+    private static void ponk() {
+        /* The ASCII comes from Beheska on Reddit. A link to the post where it is available is here.
+            https://www.reddit.com/r/mylittlepony/comments/49pmqq/ascii_thread/d0trncj
+         */
+
+        System.out.println("          _,,-ennANNNNNNNNNNNAnnn-,,_");
+        System.out.println("       ,eANNNNNNNNNNNNNNNNNNNNNNNNNNNAa,");
+        System.out.println("     ,ANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNa");
+        System.out.println("    eNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNA");
+        System.out.println("   ANNNNNNNNNNNNNNNNyNNNNNNNNNVNNNNNNNNNNNL");
+        System.out.println("  ANNNNNNNNNNNNNNNNT.::::::::::.VNNNNNyyNNN");
+        System.out.println(" :NNNNNNNNNNNNNNNV.::::::::::::::::::::.VyN");
+        System.out.println(" jNNNV*'`/_ '::\"V:::::'`      `::::::::::.y");
+        System.out.println(" NNNV   :(O) :::::::'       __  ::::::::::.");
+        System.out.println(" NNN`   : `  ::::::'       (OO) :::::::::::.");
+        System.out.println(" NNN    ;    ::::::         ``  ::::::::::::");
+        System.out.println(" NNN ...::..:::::::            :::::::::::::");
+        System.out.println(" NNN ::::::::::::::           ::::::::::::::");
+        System.out.println(" NNN ':::::' ::::::.        .:::::::::NA':::");
+        System.out.println(" NNN  \\     .:::::::::....:::::::::::'NNNN '");
+        System.out.println(" NNN   \\   .::::::::::::::::::::::::: NNNN");
+        System.out.println(" NNN    \\ .:::::::::::::::::::::::::: NNNN");
+        System.out.println(" NNN     `'::::::::'''::::::::::::::: NNNN");
+        System.out.println(" NNN                  ::::::::::::::: NNNN");
+        System.out.println(" NNN                  ::::::::::::::: NNNN");
+    }
+
     private static int[] initSettings() {
         int playerBalance;
         Scanner s = new Scanner(System.in);
@@ -426,7 +452,11 @@ public class Game {
                         ">raise <value> - raise the bet amount\n" +
                         ">fold - end game\n"
                 );
-            } else {
+            }
+            else if (response.equals("ponk")) {
+                ponk();
+            }
+            else {
                 System.out.println("Invalid input. Please enter \"start\" or \"help\" to continue.");
             }
             response = s.next();
