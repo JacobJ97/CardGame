@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Logic {
+class Logic {
 
     /**
      * Rankings
@@ -37,9 +37,12 @@ public class Logic {
     private boolean threeOfAKind;
     private String flushSuit;
     private boolean sameSuit;
+    private int maximumSuit;
+    private int straightLength;
+    private int highestCard;
 
 
-    public Logic(ArrayList<Card> cardsToCompare, Player player) {
+    Logic(ArrayList<Card> cardsToCompare, Player player) {
         this.cardsToCompare = cardsToCompare;
         this.player = player;
         cardInfo = determineHandRanking();
@@ -49,7 +52,7 @@ public class Logic {
         return cardIntValue.get(rank);
     }
 
-    Object[] determineHandRanking() {
+    private Object[] determineHandRanking() {
         int i = 0;
         String[] cardSuitArray = new String[cardsToCompare.size()];
         int[] cardIntArray = new int[cardsToCompare.size()];
@@ -62,7 +65,7 @@ public class Logic {
         return new Object[] {cardSuitArray, cardIntArray};
     }
 
-    void findingPairs(int[] cardsNum) {
+    private void findingPairs(int[] cardsNum) {
         Integer[] cardsInt = Arrays.stream(cardsNum).boxed().toArray(Integer[]::new);
         ArrayList<Integer> singlePair = new ArrayList<>();
         Arrays.sort(cardsInt, Collections.reverseOrder());
@@ -165,7 +168,7 @@ public class Logic {
         }
     }
 
-    void findStraights(int[] cardsInt, String[] cardsSuit) {
+    private void findStraights(int[] cardsInt, String[] cardsSuit) {
         Map<Integer, String> cardAndSuit = new HashMap<>();
         for (int i = 0; i < cardsToCompare.size(); i++) {
             cardAndSuit.put(cardsInt[i], cardsSuit[i]);
@@ -232,10 +235,13 @@ public class Logic {
                 }
                 rankSetter(5);
             }
+            if ((j > straightLength) && passed) {
+                straightLength = j;
+            }
         }
     }
 
-    void findFlush(int[] cardsInt, String[] cardsSuit) {
+    private void findFlush(int[] cardsInt, String[] cardsSuit) {
         Map<String, Integer> suitAndQty = new HashMap<>();
         Map<String, List<Integer>> suitAndCard = new HashMap<>();
         int s = cardsInt.length - 1;
@@ -265,10 +271,13 @@ public class Logic {
             if (suitAndQty.get(key) == 2 && cardsInt.length == 2) {
                 sameSuit = true;
             }
+            if (suitAndQty.get(key) > maximumSuit) {
+                maximumSuit = suitAndQty.get(key);
+            }
         }
     }
 
-    void findTopCards(int[] cardsIntArray) {
+    private void findTopCards(int[] cardsIntArray) {
         Arrays.sort(cardsIntArray);
         int counter;
         if (cardsIntArray.length <= 5) {
@@ -277,6 +286,9 @@ public class Logic {
             counter = cardsIntArray.length - 5;
         }
         for (var c = cardsIntArray.length - 1; c >= counter; c--) {
+            if (c == cardsIntArray.length - 1) {
+                highestCard = cardsIntArray[c];
+            }
             highCardNumbersSeperate.add(cardsIntArray[c]);
         }
         rankSetter(1);
@@ -289,14 +301,17 @@ public class Logic {
         findStraights(cardsIntArray, cardsSuitArray);
         findingPairs(cardsIntArray);
         findTopCards(cardsIntArray);
+        boolean isClose;
         if (handRank == 1) {
             highCardNumbers = highCardNumbersSeperate;
         }
-        if (isFlush) {
-            return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate};
+        if ((straightLength == 3 || straightLength == 4) || (maximumSuit == 3 || maximumSuit == 4)) {
+            isClose = true;
+            return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate, isClose, straightLength, maximumSuit};
         }
         else {
-            return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate};
+            isClose = false;
+            return new Object[]{handRank, highCardNumbers, highCardNumbersSeperate, isClose};
         }
     }
 
@@ -316,5 +331,11 @@ public class Logic {
 
     boolean isSameSuit() {
         return sameSuit;
+    }
+
+    int getHighestCard() { return highestCard;}
+
+    ArrayList<Integer> getHighCardNumbers() {
+        return highCardNumbers;
     }
 }

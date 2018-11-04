@@ -19,6 +19,7 @@ public class Game {
     private static final int[] turnInfo = {INITIAL_DRAW_TO_PLAYERS, FLOP, TURN, RIVER};
     private static String suitFlush;
     private static CommunityCards tableCards;
+    private static Logic logic;
 
     //TODO: Refactor code
 
@@ -55,6 +56,8 @@ public class Game {
             }
             //small blind
             players[smallBlindIndex].setPlayerBalance(players[smallBlindIndex].getPlayerBalance() - pot.getSmallBlind());
+            players[smallBlindIndex].setTotalBetted(pot.getSmallBlind());
+            players[smallBlindIndex].setRoundBet(pot.getSmallBlind());
             System.out.println(players[smallBlindIndex].toString() + " has gotten the small blind, putting a total of $" + pot.getSmallBlind() + " in.");
             if ((randPosition + 1) >= players.length) {
                 bigBlindIndex = 0;
@@ -64,6 +67,8 @@ public class Game {
             System.out.println(bigBlindIndex);
             //large blind
             players[bigBlindIndex].setPlayerBalance(players[bigBlindIndex].getPlayerBalance() - pot.getBigBlind());
+            players[bigBlindIndex].setTotalBetted(pot.getBigBlind());
+            players[bigBlindIndex].setRoundBet(pot.getBigBlind());
             System.out.println(players[bigBlindIndex].toString() + " has gotten the big blind, putting a total of $" + pot.getBigBlind() + " in.");
             int x = bigBlindIndex + 1;
             for (int i = 0; i < players.length; i++) {
@@ -79,6 +84,9 @@ public class Game {
             ArrayList<Player> currentPlayers = new ArrayList<>(Arrays.asList(players));
             tableCards = new CommunityCards();
             for (int turnNumber = 0; turnNumber < numberOfMoves; turnNumber++) {
+                if (currentPlayers.size() == 1) {
+                    break;
+                }
                 if (turnNumber >= 1) {
                     ArrayList<Card> cardsOnTable = cards.dealCards(turnInfo[turnNumber]);
                     tableCards.setTableCards(cardsOnTable);
@@ -91,8 +99,15 @@ public class Game {
                     currentPlayers.get(f).clearRoundBet();
                 }
                 while (!allCall) {
-                    for (int playerTurn = 0; playerTurn < currentPlayers.size(); playerTurn++) {
-                        inputsInGame(currentPlayers.get(playerTurn), playerTurn, pot, turnNumber);
+                    for (int playerTurn = 0; playerTurn < currentPlayers.size() && !allCall; playerTurn++) {
+                        if (players[playerTurn].getPlayerBalance() <= 0) {
+                            if (playerTurn == currentPlayers.size() - 1) {
+                                allCall = true;
+                            }
+                            continue;
+                        } else {
+                            inputsInGame(currentPlayers.get(playerTurn), playerTurn, pot, turnNumber);
+                        }
                         if (playerBetSet.get(currentPlayers.get(playerTurn)).equals("fold")) {
                             currentPlayers.remove(currentPlayers.get(playerTurn));
                         }
@@ -100,34 +115,33 @@ public class Game {
                             System.out.println(currentPlayers.get(0) + " has won a total of $" + pot.getPotTotal());
                             currentPlayers.get(0).addWinnings(pot.getPotTotal());
                             allCall = true;
-
+                            break;
                         }
                         for (int d = 0; d < currentPlayers.size() - 1; d++) {
-                            allCall = true;
-                            if (currentPlayers.get(d).getTotalBetted() != currentPlayers.get(d+1).getTotalBetted()) {
-                                if (currentPlayers.get(d).getPlayerBalance() == 0) {continue;}
-                                else if (currentPlayers.get(d+1).getPlayerBalance() == 0) {continue;}
-                                else {
+                            if (currentPlayers.get(d).getRoundBet() != currentPlayers.get(d + 1).getRoundBet()) {
+                                if (currentPlayers.get(d).getPlayerBalance() == 0) {
+                                    continue;
+                                } else if (currentPlayers.get(d + 1).getPlayerBalance() == 0) {
+                                    continue;
+                                } else {
                                     allCall = false;
                                     break;
                                 }
+                            } else {
+                                allCall = true;
                             }
                         }
                     }
-                }
-                if (currentPlayers.size() == 1) {
-                    break;
+                    if (currentPlayers.size() == 1) {
+                        break;
+                    }
                 }
             }
             if (currentPlayers.size() > 1) {
                 //calculating the winner
                 Map<Player, Object[]> allPlayerInfo = new HashMap<>();
                 for (int playerHand = 0; playerHand < currentPlayers.size(); playerHand++) {
-                    ArrayList<Card> allCards = new ArrayList<>();
-                    allCards.addAll(players[playerHand].getPlayerCards());
-                    allCards.addAll(tableCards.getTableCards());
-                    Logic logic = new Logic(allCards, players[playerHand]);
-                    Object[] handInformation = logic.determineHand();
+                    Object[] handInformation = setUpLogic(players[playerHand]);
                     if (logic.getFlushSuit() != null) {
                         suitFlush = logic.getFlushSuit();
                     }
@@ -145,52 +159,94 @@ public class Game {
                     System.out.print("Congrats to: ");
                     for (int j = 0; j < winners.size(); j++) {
                         Player winner = winners.get(j);
-                        System.out.print(winner + "for winning a total of $" + winner.getTotalWon() + "with a " + cardRanksString[winner.getPlayerHandRank() - 1]);
+                        System.out.print(winner + ", for winning a total of $" + winner.getTotalWon() + " with a " + cardRanksString[winner.getPlayerHandRank() - 1]);
                         getWinningMessage(winner.getPlayerHandRank(), winner.getPlayerHighlightCards());
                         if (winners.size() - j != 0) {
-                            System.out.print("& ");
+                            System.out.print(" & ");
                         }
                     }
                 }
             }
-            System.out.println("");
-            System.out.println("Do you want to play again? Y or N");
-            Scanner s = new Scanner(System.in);
-            String playAgain = s.next();
-            while (!playAgain.equals("Y") && !playAgain.equals("N")) {
-                System.out.println("Invalid input...play again? Y or N");
-                playAgain = s.next();
-            }
-            if (playAgain.equals("Y")) {
-                for (Player player : players) {
-                    player.setTotalWon(0);
-                    player.setPlayerHighlightCards(null);
-                    player.setPlayerHighestUniqueCard(0);
-                    player.setTotalBetted(-player.getTotalBetted());
-                    player.setPlayerStanding(0);
-                    player.removePlayerCards();
-                    player.setPlayerRank(0);
+            for (Player player : players ) {
+                if (player.toString().equals("Player")) {
+                    if (player.getPlayerBalance() <= 0) {
+                        System.out.println("You have ran out of money and as a result have lost.");
+                        playing = false;
+                        break;
+                    }
                 }
-                System.out.println("Another game it is, have fun!");
-            } else {
-                System.out.println("You have ended the game with a total of $" + players[0].getPlayerBalance());
-                playing = false;
+                else {
+                    if (player.getPlayerBalance() <= 0) {
+                        System.out.println(player.toString() + "has run out of money, and the game is over.");
+                        playing = false;
+                        break;
+                    }
+                }
+            }
+            if (playing) {
+                System.out.println("");
+                System.out.println("Do you want to play again? Y or N");
+                Scanner s = new Scanner(System.in);
+                String playAgain = s.next().toLowerCase();
+                while (!playAgain.equals("y") && !playAgain.equals("n")) {
+                    System.out.println("Invalid input...play again? Y or N");
+                    playAgain = s.next().toLowerCase();
+                }
+                if (playAgain.equals("y")) {
+                    for (Player player : players) {
+                        player.setTotalWon(0);
+                        player.setPlayerHighlightCards(null);
+                        player.setPlayerHighestUniqueCard(0);
+                        player.setTotalBetted(-player.getTotalBetted());
+                        player.setPlayerStanding(0);
+                        player.removePlayerCards();
+                        player.setPlayerRank(0);
+                    }
+                    System.out.println("Another game it is, have fun!");
+                } else {
+                    System.out.println("You have ended the game with a total of $" + players[0].getPlayerBalance());
+                    playing = false;
+                }
+            }
+            else {
+                ArrayList<Player> topPlayer = null;
+                int topCash = 0;
+                for (Player player : players) {
+                    int cash = player.getPlayerBalance();
+                    if (cash > topCash) {
+                        topPlayer.clear();
+                        topPlayer.add(player);
+                        topCash = cash;
+                    }
+                    else if (cash == topCash) {
+                        topPlayer.add(player);
+                    }
+                }
+                System.out.print("Congrats to: ");
+
+                for (int d = 0; d < topPlayer.size(); d++) {
+                    System.out.print(topPlayer.get(d));
+                    if (d < topPlayer.size() - 1) {
+                        System.out.print(" & ");
+                    }
+                }
+                System.out.println(", you have won the game with a total of $" + topCash);
             }
         }
     }
 
     private static void getWinningMessage(int rank, ArrayList<Integer> winningCards) {
-        if (rank == 2 || rank == 4 || rank == 8) {
-            System.out.print(" of " + ranksInt[(winningCards.get(0) - 1)]);
+        if (rank == 1 || rank == 2 || rank == 4 || rank == 8) {
+            System.out.println(" of " + ranksInt[(winningCards.get(0) - 1)]);
         }
         else if (rank == 3 || rank == 7) {
-            System.out.print(" of " + ranksInt[(winningCards.get(0) - 1)] + "& " + ranksInt[(winningCards.get(1) - 1)]);
+            System.out.println(" of " + ranksInt[(winningCards.get(0) - 1)] + " & " + ranksInt[(winningCards.get(1) - 1)]);
         }
         else if (rank == 5 || rank == 9 || rank == 10) {
-            System.out.print(" that is between " + ranksInt[(winningCards.get(0) - 1)] + "& " + ranksInt[(winningCards.get(1) - 1)]);
+            System.out.println(" that is between " + ranksInt[(winningCards.get(0) - 1)] + " & " + ranksInt[(winningCards.get(1) - 1)]);
         }
         else {
-            System.out.print(" of " + suitFlush);
+            System.out.println(" of " + suitFlush);
         }
     }
 
@@ -221,39 +277,71 @@ public class Game {
                 System.out.println("$" + playerBalance);
                 move = s.next().toLowerCase();
             }
+            while (move.equals("hand")) {
+                Object[] handInformation = setUpLogic(player);
+                int rankFormatted = (int)handInformation[0] - 1;
+                int rank = (int)handInformation[0];
+                String firstIndex = ranksInt[logic.getHighCardNumbers().get(0) - 1];
+                System.out.print("Your best hand is: " + cardRanksString[rankFormatted] + " ");
+                if (rank == 1) {
+                    System.out.println("of " + ranksInt[logic.getHighestCard() - 1]);
+                }
+                else if (rank == 2 || rank == 4 || rank == 8) {
+                    System.out.println("of " + firstIndex);
+                }
+                else if (rank == 3 || rank == 7) {
+                    System.out.println("of " + firstIndex + " & " + ranksInt[logic.getHighCardNumbers().get(2) - 1]);
+                }
+                else if (rank == 5 || rank == 9 || rank == 10) {
+                    System.out.println("of " + firstIndex + " & " + ranksInt[logic.getHighCardNumbers().get(1) - 1]);
+                }
+                else if (rank == 6) {
+                    System.out.println("of " + logic.getFlushSuit());
+                }
+                move = s.next().toLowerCase();
+            }
             while (!move.equals("call") && !move.equals("raise") && !move.equals("fold")) {
                 System.out.println("That is not a proper input. You can either check your balance, call, raise or fold.");
                 move = s.next().toLowerCase();
             }
         }
         else {
-            ArrayList<Card> cardsAllLogic = new ArrayList<>();
-            cardsAllLogic.addAll(player.getPlayerCards());
-            cardsAllLogic.addAll(tableCards.getTableCards());
-            Logic logic = new Logic(cardsAllLogic, player);
-            Object[] handInformation = logic.determineHand();
+            Object[] handInformation = setUpLogic(player);
             ComputerBrain ai = new ComputerBrain(handInformation, logic);
             ai.determineMove(turnNumber, playerBetSet);
             move = ai.getMove();
             if (move.equals("raise")) {
                 raiseAmount = ai.getRaiseValue();
             }
-            cardsAllLogic.clear();
         }
         playerBetSet.put(player, move);
         switch (move) {
             case "call": {
                 int call = pot.getCallTotal();
-                if (call > player.getPlayerBalance()) {
+                if (call >= player.getPlayerBalance()) {
                     call = player.getPlayerBalance();
                     pot.setPotTotal(call);
+                    player.setRoundBet(call);
                     player.setPlayerBalance(0);
+                    player.setTotalBetted(call);
+                    System.out.println(player + " has called a total of $" + call);
                 } else {
-                    pot.setPotTotal(call);
-                    player.setPlayerBalance(player.getPlayerBalance() - call);
+                    if (player.getRoundBet() > 0) {
+                        call = pot.getCallTotal() - player.getRoundBet();
+                        pot.setPotTotal(call);
+                        player.setRoundBet(call);
+                        player.setPlayerBalance(player.getPlayerBalance() - call);
+                        player.setTotalBetted(call);
+                        System.out.println(player + " has called a total of $" + call);
+                    }
+                    else {
+                        pot.setPotTotal(call);
+                        player.setRoundBet(call);
+                        player.setPlayerBalance(player.getPlayerBalance() - call);
+                        player.setTotalBetted(call);
+                        System.out.println(player + " has called a total of $" + call);
+                    }
                 }
-                player.setTotalBetted(call);
-                System.out.println(player + " has called a total of $" + call);
                 break;
             }
             case "raise": {
@@ -264,15 +352,16 @@ public class Game {
                 }
                 if (call + raiseAmount > player.getPlayerBalance()) {
                     raiseAmount = player.getPlayerBalance();
-                    pot.setPotTotal(raiseAmount);
+                    pot.setPotTotal(raiseAmount, player.getRoundBet());
                     player.setRoundBet(raiseAmount);
-                    player.setPlayerBalance(0);
+                    player.setTotalBetted(raiseAmount);
+                    player.setPlayerBalance(-player.getPlayerBalance());
                 } else {
                     pot.setPotTotal(call + raiseAmount);
-                    player.setRoundBet(raiseAmount);
+                    player.setRoundBet(call + raiseAmount);
+                    player.setTotalBetted(call + raiseAmount);
                     player.setPlayerBalance(player.getPlayerBalance() - (call + raiseAmount));
                 }
-                player.setTotalBetted(call + raiseAmount);
                 System.out.println(player + " has raised it by $" + raiseAmount + " to bring the bet total to $" + (call + raiseAmount));
                 break;
             }
@@ -284,8 +373,43 @@ public class Game {
         }
     }
 
+    private static Object[] setUpLogic(Player player) {
+        ArrayList<Card> cardsAllLogic = new ArrayList<>();
+        cardsAllLogic.addAll(player.getPlayerCards());
+        cardsAllLogic.addAll(tableCards.getTableCards());
+        logic = new Logic(cardsAllLogic, player);
+        return logic.determineHand();
+    }
+
+    private static void ponk() {
+        /* The ASCII comes from Beheska on Reddit. A link to the post where it is available is here.
+            https://www.reddit.com/r/mylittlepony/comments/49pmqq/ascii_thread/d0trncj
+         */
+
+        System.out.println("          _,,-ennANNNNNNNNNNNAnnn-,,_");
+        System.out.println("       ,eANNNNNNNNNNNNNNNNNNNNNNNNNNNAa,");
+        System.out.println("     ,ANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNa");
+        System.out.println("    eNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNA");
+        System.out.println("   ANNNNNNNNNNNNNNNNyNNNNNNNNNVNNNNNNNNNNNL");
+        System.out.println("  ANNNNNNNNNNNNNNNNT.::::::::::.VNNNNNyyNNN");
+        System.out.println(" :NNNNNNNNNNNNNNNV.::::::::::::::::::::.VyN");
+        System.out.println(" jNNNV*'`/_ '::\"V:::::'`      `::::::::::.y");
+        System.out.println(" NNNV   :(O) :::::::'       __  ::::::::::.");
+        System.out.println(" NNN`   : `  ::::::'       (OO) :::::::::::.");
+        System.out.println(" NNN    ;    ::::::         ``  ::::::::::::");
+        System.out.println(" NNN ...::..:::::::            :::::::::::::");
+        System.out.println(" NNN ::::::::::::::           ::::::::::::::");
+        System.out.println(" NNN ':::::' ::::::.        .:::::::::NA':::");
+        System.out.println(" NNN  \\     .:::::::::....:::::::::::'NNNN '");
+        System.out.println(" NNN   \\   .::::::::::::::::::::::::: NNNN");
+        System.out.println(" NNN    \\ .:::::::::::::::::::::::::: NNNN");
+        System.out.println(" NNN     `'::::::::'''::::::::::::::: NNNN");
+        System.out.println(" NNN                  ::::::::::::::: NNNN");
+        System.out.println(" NNN                  ::::::::::::::: NNNN");
+    }
+
     private static int[] initSettings() {
-        int playerBalance = 0;
+        int playerBalance;
         Scanner s = new Scanner(System.in);
         do {
             System.out.println("Each player starts with?");
@@ -297,7 +421,7 @@ public class Game {
         } while (playerBalance < 0);
         int numOfPlayers;
         do {
-            System.out.println("Number of players? (min 2, max 8)");
+            System.out.println("Number of players? (min 2, max 8) [2 is recommended]");
             while (!s.hasNextInt()) {
                 System.out.println("Invalid input!");
                 s.next();
@@ -323,10 +447,17 @@ public class Game {
             if (response.equals("help")) {
                 System.out.println(
                         ">cash - look at balance\n" +
+                        ">hand - see your best hand\n" +
                         ">call - make an equal bet\n" +
                         ">raise <value> - raise the bet amount\n" +
                         ">fold - end game\n"
                 );
+            }
+            else if (response.equals("ponk")) {
+                ponk();
+            }
+            else {
+                System.out.println("Invalid input. Please enter \"start\" or \"help\" to continue.");
             }
             response = s.next();
         }
