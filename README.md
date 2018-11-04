@@ -1,5 +1,5 @@
 # CardGame (Texas Hold'Em - Java Edition)
-**Version: 0.02 (Pre-Alpha)**
+**Version: 0.1 (Pre-Alpha)**
 
 This project strives to create a version of Texas Hold'Em purely in the language of Java. The game is currently in a state where it can be played off a command line, but nothing more. It is still very buggy and features still need to be added. *In theory* though, a game is totally possible. A GUI is expected to be added later, but until it can be only played on a command line, and I have only been testing through my IDE (IntellIJ Idea), so nothing is guaranteed.
 
@@ -14,7 +14,10 @@ The command line gives instructions on how to play.
 
 ## Versions
 
-### 0.1 [???]
+### 0.2 [???]
+- [Feature] GUI interface
+
+### 0.1 [4/11/2018]
 - [Feature] During a turn, a user can enter a command to see what their hand value is
 - [Feature] Simple end game added, when works in two ways. Firstly, a player hits 0, and they have lost. Secondly, a computer player hits 0, and the cash totals of all remaining players are calculated, with the highest winning.
 - [Enhancement] Improved printing message when a round has multiple winners
