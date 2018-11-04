@@ -232,7 +232,7 @@ public class Game {
                     }
                 }
                 System.out.println(", you have won the game with a total of $" + topCash);
-        }
+            }
         }
     }
 
