@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Game {
@@ -209,17 +210,29 @@ public class Game {
                 }
             }
             else {
-                Player topPlayer = null;
+                ArrayList<Player> topPlayer = null;
                 int topCash = 0;
                 for (Player player : players) {
                     int cash = player.getPlayerBalance();
                     if (cash > topCash) {
-                        topPlayer = player;
+                        topPlayer.clear();
+                        topPlayer.add(player);
                         topCash = cash;
                     }
+                    else if (cash == topCash) {
+                        topPlayer.add(player);
+                    }
                 }
-                System.out.println("Congrats " + topPlayer + ", you have won the game with a total of $" + topCash);
-            }
+                System.out.print("Congrats to: ");
+
+                for (int d = 0; d < topPlayer.size(); d++) {
+                    System.out.print(topPlayer.get(d));
+                    if (d < topPlayer.size() - 1) {
+                        System.out.print(" & ");
+                    }
+                }
+                System.out.println(", you have won the game with a total of $" + topCash);
+        }
         }
     }
 
