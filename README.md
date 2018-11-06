@@ -40,3 +40,8 @@ The command line gives instructions on how to play.
 
 ### 0.01 [13/10/2018]
 - Initial Release
+
+## Sources
+
+- Main screen poker image retrieved from [here](https://en.m.wikipedia.org/wiki/File:Poker_cards_and_chips.jpg)
+  Original image can be found on this [page](https://www.history.com/news/where-did-poker-originate).
